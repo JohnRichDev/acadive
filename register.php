@@ -158,7 +158,7 @@
 
   <div class="card">
     <div style="text-align: center;">
-      <img class="logo" src="img/logo.svg" draggable="false" alt="Acadive Logo"/>
+      <img class="logo" src="img/logo.svg" draggable="false" alt="Acadive Logo" />
       <h1>Register</h1>
     </div>
 
@@ -167,12 +167,18 @@
         <label for="username">Username</label>
         <input type="text" id="username" placeholder="myusername123" required />
       </div>
+
       <div>
         <label for="password">Password</label>
         <input type="password" id="password" placeholder="••••••••" required />
       </div>
 
-      <button type="submit">Log In</button>
+      <div>
+        <label for="password">Confirm Password</label>
+        <input type="password" id="password" placeholder="••••••••" required />
+      </div>
+
+      <button type="submit">Register</button>
     </form>
   </div>
 
