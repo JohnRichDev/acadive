@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Acadive</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            margin: 0;
+            background-color: #f4f6f8;
+            overflow: hidden;
+        }
+
+        .logo {
+            height: 65px;
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            user-select: none;
+            margin-top: 20px;
+        }
+
+        #sidebar {
+            width: 220px;
+            background-color: #0a1f44;
+            color: white;
+            padding: 20px;
+            height: 100vh;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #sidebar button {
+            font-family: Verdana;
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            margin-top: 20px;
+            padding: 10px 15px;
+            background: none;
+            border: none;
+            color: white;
+            text-align: left;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: large;
+        }
+
+        #sidebar button:hover {
+            background-color: #1c3d7a;
+        }
+
+        #content {
+            padding: 20px;
+            flex-grow: 1;
+            background-color: #f2f2f2;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section {
+            display: none;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .active {
+            display: flex;
+        }
+
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .welcome-message {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        .account-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .account-actions button {
+            padding: 8px 15px;
+            background-color: #1c3d7a;
+            border: none;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .account-actions button:hover {
+            background-color: #163b65;
+        }
+
+        .filters-bar {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .search-filter {
+            flex: 1;
+            max-width: 500px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .search-filter input,
+        .search-filter select {
+            padding: 8px 10px;
+            border-radius: 5px;
+            border: 1px solid #e3e3e3;
+            font-size: 0.9rem;
+        }
+
+        .search-filter select {
+            min-width: 120px;
+        }
+
+        .search-filter input {
+            flex-grow: 1;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-buttons button {
+            padding: 8px 15px;
+            background-color: #1c3d7a;
+            border: none;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .action-buttons button:hover {
+            background-color: #163b65;
+        }
+
+        .section-content {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .card {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .hov:hover {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: #0a1f44;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .card h3 i {
+            margin-right: 8px;
+            color: #1c3d7a;
+        }
+
+        .stats-card {
+            text-align: center;
+            padding: 25px 15px;
+        }
+
+        .stats-card .count {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1c3d7a;
+            margin: 10px 0;
+        }
+
+        .stats-card .label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .chart-container {
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        .graph-tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e3e3e3;
+        }
+
+        .graph-tabs button {
+            background: none;
+            border: none;
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+
+        .graph-tabs button.active {
+            border-bottom: 3px solid #1c3d7a;
+            color: #1c3d7a;
+            font-weight: 600;
+        }
+
+        .student-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .student-table th {
+            background-color: #f5f7fa;
+            color: #0a1f44;
+            font-weight: 600;
+            padding: 12px 15px;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #e3e3e3;
+            text-align: center;
+        }
+
+        .student-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e3e3e3;
+            color: #333;
+            font-size: 0.95rem;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .student-table tr:hover {
+            background-color: #f5f9ff;
+        }
+
+        .student-table .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e3f2fd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .student-table .avatar img {
+            width: 100%;
+            height: auto;
+        }
+
+        .action-btn {
+            background-color: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background-color: #1976d2;
+        }
+
+        .fas {
+            margin-right: 5px;
+        }
+    </style>
+    <script src="https://kit.fontawesome.com/45304bf22c.js"></script>
+</head>
+
+<body>
+    <div id="sidebar">
+        <img class="logo" draggable="false" src="img/logo_invert.svg" alt="Acadive Logo" />
+        <div style="margin-top: 20px;">
+            <button href="#dashboard" onclick="showSection('dashboard')">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </button>
+            <button href="#students" onclick="showSection('students')">
+                <i class="fas fa-users"></i> Student
+            </button>
+            <button href="#account" onclick="showSection('account')">
+                <i class="fas fa-cogs"></i> Account
+            </button>
+        </div>
+        <hr style="margin-top: 20px; margin-bottom: 20px;">
+        <button href="#account" onclick="showSection('account')">
+            <i class="fas fa-sign-out"></i> Logout
+        </button>
+    </div>
+
+    <div id="content">
+        <div class="top-header">
+            <div class="welcome-message">
+                Welcome, Administrator! <span id="current-date"></span>
+            </div>
+            <div class="account-actions">
+                <button><i class="fas fa-bell"></i> Notifications</button>
+                <button><i class="fas fa-user-circle"></i> My Profile</button>
+                <button><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </div>
+
+        <div id="dashboard" class="section active">
+            <div class="filters-bar">
+                <div class="search-filter">
+                    <select id="academic-year" name="academic-year">
+                        <option value="2024-2025">A.Y. 2024-2025</option>
+                        <option value="2023-2024">A.Y. 2023-2024</option>
+                        <option value="2022-2023">A.Y. 2022-2023</option>
+                    </select>
+                    <select id="semester" name="semester">
+                        <option value="1st">1st Semester</option>
+                        <option value="2nd">2nd Semester</option>
+                        <option value="mid">Mid Year</option>
+                    </select>
+                </div>
+                <!-- <div class="action-buttons">
+                    <button><i class="fas fa-download"></i> Export Data</button>
+                    <button><i class="fas fa-print"></i> Print Report</button>
+                </div> -->
+            </div>
+
+            <div class="section-content">
+                <h2>Dashboard Overview</h2>
+                <div class="grid">
+                    <div class="card stats-card hov">
+                        <h3><i class="fas fa-users"></i> Total Students</h3>
+                        <div class="count">326</div>
+                    </div>
+                    <div class="card stats-card hov">
+                        <h3><i class="fas fa-male"></i> Total Male</h3>
+                        <div class="count">200</div>
+                    </div>
+                    <div class="card stats-card hov">
+                        <h3><i class="fas fa-female"></i> Total Female</h3>
+                        <div class="count">126</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-chart-pie"></i> Statistics</h3>
+                </div>
+            </div>
+        </div>
+
+        <div id="students" class="section">
+            <div class="filters-bar">
+                <div class="search-filter">
+                    <input type="text" placeholder="Search Students...">
+                    <select>
+                        <option value="all">All Years</option>
+                        <option value="1">Year 1</option>
+                        <option value="2">Year 2</option>
+                        <option value="3">Year 3</option>
+                        <option value="4">Year 4</option>
+                    </select>
+                    <select>
+                        <option value="all">All Sections</option>
+                        <option value="A">Section A</option>
+                        <option value="B">Section B</option>
+                        <option value="C">Section C</option>
+                    </select>
+                </div>
+                <!-- <div class="action-buttons">
+                    <button><i class="fas fa-file-export"></i> Export</button>
+                    <button><i class="fas fa-print"></i> Print</button>
+                    <button><i class="fas fa-plus"></i> New Student</button>
+                </div> -->
+            </div>
+
+            <div class="section-content">
+                <h2>List of Students (A.Y 2024-2025 2nd Semester)</h2>
+                <div class="card">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div style="display: flex; align-items: center;">
+                            <span style="margin-right: 10px;">Sort by:</span>
+                            <div style="position: relative; display: inline-block;">
+                                <select
+                                    style="padding: 8px 30px 8px 10px; border-radius: 4px; border: 1px solid #ddd; appearance: none;">
+                                    <option>Year</option>
+                                    <option>Name</option>
+                                    <option>Section</option>
+                                    <option>Student No</option>
+                                </select>
+                                <i class="fas fa-chevron-down"
+                                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #666;"></i>
+                            </div>
+                        </div>
+                        <button class="action-buttons"
+                            style="padding: 8px 15px; display: flex; align-items: center; gap: 5px; border-radius: 4px;">
+                            <i class="fas fa-plus"></i> New Student Record
+                        </button>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table class="student-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">No</th>
+                                    <th style="width: 70px;">Pic</th>
+                                    <th>Student No</th>
+                                    <th>Last Name</th>
+                                    <th>First Name</th>
+                                    <th style="width: 50px;">MI</th>
+                                    <th style="width: 70px;">Year</th>
+                                    <th style="width: 70px;">Section</th>
+                                    <th>Address</th>
+                                    <th style="width: 80px;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>
+                                        <div class="avatar">
+                                            <img src="img/person.png" alt="Student Photo">
+                                        </div>
+                                    </td>
+                                    <td>26-123456</td>
+                                    <td>Carino</td>
+                                    <td>Engelbert</td>
+                                    <td>T</td>
+                                    <td>2</td>
+                                    <td>A</td>
+                                    <td>16 Quiling Norte, Batac City, Ilocos Norte</td>
+                                    <td>
+                                        <button class="action-btn center">
+                                            <i class="fas fa-pen"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span>Show</span>
+                            <select style="padding: 6px; border-radius: 4px; border: 1px solid #ddd;">
+                                <option>10</option>
+                                <option>25</option>
+                                <option>50</option>
+                                <option>100</option>
+                            </select>
+                            <span>entries</span>
+                        </div>
+                        <div style="display: flex; gap: 5px;">
+                            <button
+                                style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">Previous</button>
+                            <button
+                                style="padding: 6px 12px; background: #1c3d7a; color: white; border: none; border-radius: 4px; cursor: pointer;">1</button>
+                            <button
+                                style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">2</button>
+                            <button
+                                style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">3</button>
+                            <button
+                                style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="account" class="section">
+            <!-- <div class="filters-bar">
+                <div class="search-filter">
+                    <input type="text" placeholder="Search Account Settings...">
+                </div>
+                <div class="action-buttons">
+                    <button><i class="fas fa-key"></i> Change Password</button>
+                    <button><i class="fas fa-shield-alt"></i> Security Settings</button>
+                </div>
+            </div> -->
+
+            <div class="section-content">
+                <h2>Account Settings</h2>
+                <div class="card">
+                    <p>[User account details, login info, update password, etc]</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        const today = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('current-date').textContent = today.toLocaleDateString('en-US', options);
+    </script>
+</body>
+
+</html>
