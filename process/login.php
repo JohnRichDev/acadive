@@ -12,12 +12,12 @@ if (mysqli_num_rows($result) > 0) {
         header("Location: ../index.php");
         exit;
     } else {
-        $_SESSION["error"] = "Incorrect password";
+        $_SESSION["error"] = "Incorrect password!";
         header("Location: ../login.php");
         exit;
     }
 } else {
-    $_SESSION["error"] = "Username is not found";
+    $_SESSION["error"] = "Username is not found!";
     header("Location: ../login.php");
     exit;
 }
