@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<?php
+// check already logged in
+session_start();
+if (isset($_SESSION["username"])) {
+  header("Location: index.php");
+  exit;
+}
+?>
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -157,12 +166,21 @@
 <body>
 
   <div class="card">
+    <?php
+    if (isset($_SESSION["error"])) {
+      echo '    <div
+      style="background-color: #f8d7da;  color: #721c24; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center; gap: 0.5rem;">
+      <i class="fas fa-triangle-exclamation" style="margin-right: 10px;"></i><span>' . $_POST["error"] . '</span>
+    </div>';
+      unset($_SESSION["error"]);
+    }
+    ?>
     <div style="text-align: center;">
       <img class="logo" src="img/logo.svg" draggable="false" alt="Acadive Logo" />
       <h1>Login</h1>
     </div>
 
-    <form>
+    <form action="process/login.php" method="POST">
       <div>
         <label for="username">Username</label>
         <input type="text" name="username" maxlength="32" id="username" placeholder="myusername123" required />

@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<?php
+session_start();
+// check already logged in
+if (!isset($_SESSION["username"])) {
+    header("Location: login.php");
+    exit;
+}
+?>
+
 <head>
     <meta charset="UTF-8">
     <title>Acadive</title>
@@ -339,7 +348,7 @@
             </button>
         </div>
         <hr style="color:#0a1f44; margin-top: 20px; margin-bottom: 20px;">
-        <button href="#account" onclick="showSection('account')">
+        <button onclick="window.location.href='process/logout.php'">
             <i class="fas fa-sign-out"></i> Logout
         </button>
     </div>
@@ -347,11 +356,23 @@
     <div id="content">
         <div class="top-header">
             <div class="welcome-message">
-                <span style="font-size: x-large;">Welcome, <b>John Rich</b>!</span>
+                <span style="font-size: x-large;">Welcome, <b>
+                    <?php
+                    if (isset($_SESSION["username"])) {
+                        echo $_SESSION["username"];
+                    } else {
+                        header("Location: login.php");
+                    }
+                    ?></b>!</span>
             </div>
             <div class="right-header" style="flex-direction: row; align-items: center; gap: 10px;">
                 <div style="text-align: right;">
-                    <span style="font-size: large;"><b>John Rich</b></span><br>
+                    <span style="font-size: large;"><b>
+                        <?php
+                        $username = $_SESSION["username"];
+                        echo strtoupper($username);
+                        ?>
+                    </b></span><br>
                     Administrator
                 </div>
                 <div class="avatar">

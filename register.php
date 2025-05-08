@@ -1,12 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<?php
+session_start();
+// check already logged in
+if (isset($_SESSION["username"])) {
+  header("Location: index.html");
+  exit;
+}
+?>
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Register - Acadive</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/45304bf22c.js"></script>
   <style>
     * {
       margin: 0;
@@ -155,8 +165,16 @@
 </head>
 
 <body>
-
   <div class="card">
+    <?php
+    if (isset($_SESSION["error"])) {
+      echo '    <div
+      style="background-color: #f8d7da;  color: #721c24; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center; gap: 0.5rem;">
+      <i class="fas fa-triangle-exclamation" style="margin-right: 10px;"></i><span>' . $_POST["error"] . '</span>
+    </div>';
+      unset($_SESSION["error"]);
+    }
+    ?>
     <div style="text-align: center;">
       <img class="logo" src="img/logo.svg" draggable="false" alt="Acadive Logo" />
       <h1>Register</h1>
