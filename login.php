@@ -119,7 +119,7 @@
       margin-top: 10px;
     }
 
-    button {
+    .btn {
       width: 100%;
       padding: 0.75rem;
       background-color: #1e3a8a;
@@ -131,7 +131,7 @@
       transition: background 0.3s ease, transform 0.2s ease;
     }
 
-    button:hover {
+    .btn:hover {
       background-color: #374eb7;
       transform: scale(1.02);
     }
@@ -158,18 +158,18 @@
 
   <div class="card">
     <div style="text-align: center;">
-      <img class="logo" src="img/logo.svg" draggable="false" alt="Acadive Logo"/>
+      <img class="logo" src="img/logo.svg" draggable="false" alt="Acadive Logo" />
       <h1>Login</h1>
     </div>
 
     <form>
       <div>
         <label for="username">Username</label>
-        <input type="text" id="username" placeholder="myusername123" required />
+        <input type="text" name="username" maxlength="32" id="username" placeholder="myusername123" required />
       </div>
       <div>
         <label for="password">Password</label>
-        <input type="password" id="password" placeholder="••••••••" required />
+        <input type="password" name="password" maxlength="128" id="password" placeholder="••••••••" required />
       </div>
 
       <div class="toggle-password">
@@ -177,7 +177,7 @@
         <label for="showPassword">Show Password</label>
       </div>
 
-      <button type="submit">Log In</button>
+      <input type="submit" value="Login" class="btn" />
     </form>
   </div>
 

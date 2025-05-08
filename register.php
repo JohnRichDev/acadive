@@ -119,7 +119,7 @@
       margin-top: 10px;
     }
 
-    button {
+    .btn {
       width: 100%;
       padding: 0.75rem;
       background-color: #1e3a8a;
@@ -131,7 +131,7 @@
       transition: background 0.3s ease, transform 0.2s ease;
     }
 
-    button:hover {
+    .btn:hover {
       background-color: #374eb7;
       transform: scale(1.02);
     }
@@ -162,23 +162,24 @@
       <h1>Register</h1>
     </div>
 
-    <form>
+    <form action="process/register.php" method="POST">
       <div>
         <label for="username">Username</label>
-        <input type="text" id="username" placeholder="myusername123" required />
+        <input type="text" maxlength="32" name="username" id="username" placeholder="myusername123" required />
       </div>
 
       <div>
         <label for="password">Password</label>
-        <input type="password" id="password" placeholder="••••••••" required />
+        <input type="password" maxlength="128" name="password" id="password" placeholder="••••••••" required />
       </div>
 
       <div>
-        <label for="password">Confirm Password</label>
-        <input type="password" id="password" placeholder="••••••••" required />
+        <label for="confirm_password">Confirm Password</label>
+        <input type="password" maxlength="128" name="confirm_password" id="confirm_password" placeholder="••••••••"
+          required />
       </div>
 
-      <button type="submit">Register</button>
+      <input type="submit" value="Register" class="btn" />
     </form>
   </div>
 
