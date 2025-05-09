@@ -7,14 +7,6 @@ if (!isset($_SESSION["username"])) {
     header("Location: login.php");
     exit;
 }
-
-if (isset($_GET['section'])) {
-    $_SESSION['active_section'] = $_GET['section'];
-}
-
-if (!isset($_SESSION['active_section'])) {
-    $_SESSION['active_section'] = 'dashboard';
-}
 ?>
 
 <head>
@@ -43,13 +35,13 @@ if (!isset($_SESSION['active_section'])) {
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            transition: all 0.6s ease-out;
+            transition: all 0.25s ease-out;
         }
 
         .preloader-logo {
             width: 300px;
             margin-bottom: 30px;
-            animation: pulse 1.5s ease-in-out infinite alternate;
+            animation: pulse 1s ease-in-out infinite alternate;
         }
 
         @keyframes pulse {
@@ -579,6 +571,10 @@ if (!isset($_SESSION['active_section'])) {
         document.addEventListener('DOMContentLoaded', function () {
             const activeSection = '<?php echo $_SESSION["active_section"]; ?>';
             showSection(activeSection);
+            
+            const params = new URLSearchParams(window.location.search);
+            const section = params.get('section') || 'dashboard';
+            showSection(section);
 
             window.addEventListener('load', function () {
                 const preloader = document.getElementById('preloader');
@@ -587,13 +583,15 @@ if (!isset($_SESSION['active_section'])) {
                     // preloader.style.transform = 'translateY(-20px)';
                     setTimeout(function () {
                         preloader.style.display = 'none';
-                    }, 600);
+                    }, 500);
                 }, 800);
             });
         });
 
         function navigateToSection(sectionId) {
-            window.location.href = window.location.pathname + '?section=' + sectionId;
+            showSection(sectionId);
+
+            history.pushState(null, '', '?section=' + sectionId);
         }
 
         function showSection(sectionId) {
