@@ -3,10 +3,17 @@
 
 <?php
 session_start();
-// check already logged in
 if (!isset($_SESSION["username"])) {
     header("Location: login.php");
     exit;
+}
+
+if (isset($_GET['section'])) {
+    $_SESSION['active_section'] = $_GET['section'];
+}
+
+if (!isset($_SESSION['active_section'])) {
+    $_SESSION['active_section'] = 'dashboard';
 }
 ?>
 
@@ -14,6 +21,7 @@ if (!isset($_SESSION["username"])) {
     <meta charset="UTF-8">
     <title>Acadive</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://kit.fontawesome.com/45304bf22c.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -21,6 +29,39 @@ if (!isset($_SESSION["username"])) {
             margin: 0;
             background-color: #f4f6f8;
             overflow: hidden;
+        }
+
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0a1f44;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: all 0.6s ease-out;
+        }
+
+        .preloader-logo {
+            width: 300px;
+            margin-bottom: 30px;
+            animation: pulse 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            from {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            to {
+                transform: scale(1.05);
+                opacity: 0.8;
+            }
         }
 
         .logo {
@@ -330,26 +371,29 @@ if (!isset($_SESSION["username"])) {
             margin-right: 5px;
         }
     </style>
-    <script src="https://kit.fontawesome.com/45304bf22c.js"></script>
 </head>
 
 <body>
+    <div id="preloader">
+        <img src="img/logo_invert.svg" alt="Acadive Logo" class="preloader-logo">
+    </div>
+
     <div id="sidebar">
         <img class="logo" draggable="false" src="img/logo_invert.svg" alt="Acadive Logo" />
         <div style="margin-top: 20px;">
-            <button href="#dashboard" onclick="showSection('dashboard')">
+            <button onclick="navigateToSection('dashboard')">
                 <i class="fas fa-tachometer-alt"></i> Dashboard
             </button>
-            <button href="#students" onclick="showSection('students')">
+            <button onclick="navigateToSection('students')">
                 <i class="fas fa-users"></i> Student
             </button>
-            <button href="#account" onclick="showSection('account')">
+            <button onclick="navigateToSection('account')">
                 <i class="fas fa-cogs"></i> Account
             </button>
         </div>
         <hr style="color:#0a1f44; margin-top: 20px; margin-bottom: 20px;">
         <button onclick="window.location.href='process/logout.php'">
-            <i class="fas fa-sign-out"></i> Logout
+            <i class="fas fa-sign-out-alt"></i> Logout
         </button>
     </div>
 
@@ -357,22 +401,22 @@ if (!isset($_SESSION["username"])) {
         <div class="top-header">
             <div class="welcome-message">
                 <span style="font-size: x-large;">Welcome, <b>
-                    <?php
-                    if (isset($_SESSION["username"])) {
-                        echo $_SESSION["username"];
-                    } else {
-                        header("Location: login.php");
-                    }
-                    ?></b>!</span>
+                        <?php
+                        if (isset($_SESSION["username"])) {
+                            echo $_SESSION["username"];
+                        } else {
+                            header("Location: login.php");
+                        }
+                        ?></b>!</span>
             </div>
             <div class="right-header" style="flex-direction: row; align-items: center; gap: 10px;">
                 <div style="text-align: right;">
                     <span style="font-size: large;"><b>
-                        <?php
-                        $username = $_SESSION["username"];
-                        echo strtoupper($username);
-                        ?>
-                    </b></span><br>
+                            <?php
+                            $username = $_SESSION["username"];
+                            echo strtoupper($username);
+                            ?>
+                        </b></span><br>
                     Administrator
                 </div>
                 <div class="avatar">
@@ -381,8 +425,7 @@ if (!isset($_SESSION["username"])) {
             </div>
         </div>
 
-        <div id="dashboard" class="section active">
-
+        <div id="dashboard" class="section">
             <div class="section-content">
                 <h2>Dashboard Overview</h2>
                 <div class="grid">
@@ -426,11 +469,6 @@ if (!isset($_SESSION["username"])) {
                         <option value="C">Section C</option>
                     </select>
                 </div>
-                <!-- <div class="action-buttons">
-                    <button><i class="fas fa-file-export"></i> Export</button>
-                    <button><i class="fas fa-print"></i> Print</button>
-                    <button><i class="fas fa-plus"></i> New Student</button>
-                </div> -->
             </div>
 
             <div class="section-content">
@@ -453,7 +491,7 @@ if (!isset($_SESSION["username"])) {
                             </div>
                         </div>
                         <button class="action-buttons"
-                            style="padding: 8px 15px; display: flex; align-items: center; gap: 5px; border-radius: 4px;">
+                            style="padding: 8px 15px; display: flex; align-items: center; gap: 5px; border-radius: 4px; cursor: pointer;">
                             <i class="fas fa-plus"></i> New Student Record
                         </button>
                     </div>
@@ -528,16 +566,6 @@ if (!isset($_SESSION["username"])) {
         </div>
 
         <div id="account" class="section">
-            <!-- <div class="filters-bar">
-                <div class="search-filter">
-                    <input type="text" placeholder="Search Account Settings...">
-                </div>
-                <div class="action-buttons">
-                    <button><i class="fas fa-key"></i> Change Password</button>
-                    <button><i class="fas fa-shield-alt"></i> Security Settings</button>
-                </div>
-            </div> -->
-
             <div class="section-content">
                 <h2>Account Settings</h2>
                 <div class="card">
@@ -548,15 +576,31 @@ if (!isset($_SESSION["username"])) {
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const activeSection = '<?php echo $_SESSION["active_section"]; ?>';
+            showSection(activeSection);
+
+            window.addEventListener('load', function () {
+                const preloader = document.getElementById('preloader');
+                setTimeout(function () {
+                    preloader.style.opacity = '0';
+                    // preloader.style.transform = 'translateY(-20px)';
+                    setTimeout(function () {
+                        preloader.style.display = 'none';
+                    }, 600);
+                }, 800);
+            });
+        });
+
+        function navigateToSection(sectionId) {
+            window.location.href = window.location.pathname + '?section=' + sectionId;
+        }
+
         function showSection(sectionId) {
             const sections = document.querySelectorAll('.section');
             sections.forEach(section => section.classList.remove('active'));
             document.getElementById(sectionId).classList.add('active');
         }
-
-        const today = new Date();
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('current-date').textContent = today.toLocaleDateString('en-US', options);
     </script>
 </body>
 
