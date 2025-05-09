@@ -168,10 +168,10 @@ if (isset($_SESSION["username"])) {
   <div class="card">
     <?php
     if (isset($_SESSION["error"])) {
-      echo '    <div
+      echo '<div
       style="background-color: #f8d7da;  color: #721c24; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center; gap: 0.5rem;">
       <i class="fas fa-triangle-exclamation" style="margin-right: 10px;"></i><span><b>ERROR:</b> ' . $_SESSION["error"] . '</span>
-    </div>';
+      </div>';
       unset($_SESSION["error"]);
     }
     ?>
