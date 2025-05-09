@@ -34,6 +34,14 @@ if (mysqli_num_rows($result) > 0) {
         mysqli_query($conn, $query);
         $_SESSION["error"] = "Your account is locked!";
         header("Location: ../login.php");
+    } else {
+        $remaining_tries = 3 - $row["tries"];
+        if ($remaining_tries == 1) {
+            $_SESSION["error"] = "Incorrect password! You have $remaining_tries try left.";
+        } else {
+            $_SESSION["error"] = "Incorrect password! You have $remaining_tries tries left.";
+        }
+        header("Location: ../login.php");
     }
 } else {
     $_SESSION["error"] = "Username not found!";
