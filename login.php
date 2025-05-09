@@ -142,7 +142,7 @@ if (isset($_SESSION["username"])) {
 
     .btn:hover {
       background-color: #374eb7;
-      transform: scale(1.02);
+      transform: scale(1.01);
     }
 
     .links {

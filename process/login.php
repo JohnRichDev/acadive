@@ -30,6 +30,8 @@ if (mysqli_num_rows($result) > 0) {
     mysqli_query($conn, $query);
 
     if (++$row["tries"] >= 3) {
+        $query = "UPDATE users SET tries = 0 WHERE username='$username'";
+        mysqli_query($conn, $query);
         $query = "UPDATE users SET locked = 'Y' WHERE username='$username'";
         mysqli_query($conn, $query);
         $_SESSION["error"] = "Your account is locked!";
