@@ -383,7 +383,7 @@ if (!isset($_SESSION["username"])) {
                 <i class="fas fa-cogs"></i> Account
             </button>
         </div>
-        <hr style="color:#0a1f44; margin-top: 20px; margin-bottom: 20px;">
+        <hr style="margin-top: 20px; margin-bottom: 20px; background-color:rgb(105, 105, 105); height: 2px; border: none;">
         <button onclick="window.location.href='process/logout.php'">
             <i class="fas fa-sign-out-alt"></i> Logout
         </button>
@@ -571,7 +571,7 @@ if (!isset($_SESSION["username"])) {
         document.addEventListener('DOMContentLoaded', function () {
             const activeSection = '<?php echo $_SESSION["active_section"]; ?>';
             showSection(activeSection);
-            
+
             const params = new URLSearchParams(window.location.search);
             const section = params.get('section') || 'dashboard';
             showSection(section);
@@ -590,8 +590,11 @@ if (!isset($_SESSION["username"])) {
 
         function navigateToSection(sectionId) {
             showSection(sectionId);
-
-            history.pushState(null, '', '?section=' + sectionId);
+            if (sectionId !== 'dashboard') {
+                history.pushState(null, '', '?section=' + sectionId);
+            } else {
+                history.pushState(null, '', window.location.pathname);
+            }
         }
 
         function showSection(sectionId) {
