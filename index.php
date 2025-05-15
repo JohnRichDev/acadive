@@ -362,6 +362,121 @@ if (!isset($_SESSION["username"])) {
         .fas {
             margin-right: 5px;
         }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #1c3d7a;
+            outline: none;
+        }
+
+        .form-buttons {
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        .btn-primary {
+            background-color: #1c3d7a;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .alert {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 
@@ -383,7 +498,8 @@ if (!isset($_SESSION["username"])) {
                 <i class="fas fa-cogs"></i> Account
             </button>
         </div>
-        <hr style="margin-top: 20px; margin-bottom: 20px; background-color:rgb(105, 105, 105); height: 2px; border: none;">
+        <hr
+            style="margin-top: 20px; margin-bottom: 20px; background-color:rgb(105, 105, 105); height: 2px; border: none;">
         <button onclick="window.location.href='process/logout.php'">
             <i class="fas fa-sign-out-alt"></i> Logout
         </button>
@@ -441,7 +557,22 @@ if (!isset($_SESSION["username"])) {
             </div>
         </div>
 
-        <div id="students" class="section">
+        <div id="students" class="section"> <?php
+        if (isset($_SESSION["success"])) {
+            echo '<div class="alert alert-success" style="display: flex; align-items: center; background-color: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #c3e6cb;">
+                    <i class="fas fa-check-circle" style="margin-right: 10px; font-size: 1.2em;"></i>
+                    <span style="flex: 1;">' . htmlspecialchars($_SESSION["success"]) . '</span>
+                </div>';
+            unset($_SESSION["success"]);
+        }
+        if (isset($_SESSION["error"])) {
+            echo '<div class="alert alert-error" style="display: flex; align-items: center; background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #f5c6cb;">
+                    <i class="fas fa-exclamation-circle" style="margin-right: 10px; font-size: 1.2em;"></i>
+                    <span style="flex: 1;">' . htmlspecialchars($_SESSION["error"]) . '</span>
+                </div>';
+            unset($_SESSION["error"]);
+        }
+        ?>
             <div class="filters-bar">
                 <div class="search-filter">
                     <input type="text" placeholder="Search Students...">
@@ -505,26 +636,45 @@ if (!isset($_SESSION["username"])) {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>
-                                        <div class="stud-avatar">
-                                            <img src="img/person.png" alt="Student Photo">
-                                        </div>
-                                    </td>
-                                    <td>26-123456</td>
-                                    <td>Carino</td>
-                                    <td>Engelbert</td>
-                                    <td>T</td>
-                                    <td>2</td>
-                                    <td>A</td>
-                                    <td>16 Quiling Norte, Batac City, Ilocos Norte</td>
-                                    <td>
-                                        <button class="action-btn">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                    </td>
-                                </tr>
+                                <?php
+                                // Include database connection
+                                include("database/connection.php");
+
+                                // Query to fetch all students
+                                $query = "SELECT * FROM students ORDER BY last_name ASC";
+                                $result = mysqli_query($conn, $query);
+
+                                if (mysqli_num_rows($result) > 0) {
+                                    $counter = 1;
+                                    while ($row = mysqli_fetch_assoc($result)) {
+                                        echo "<tr>";
+                                        echo "<td>" . $counter . "</td>";
+                                        echo "<td>
+                                                <div class='stud-avatar'>
+                                                    <img src='img/person.png' alt='Student Photo'>
+                                                </div>
+                                            </td>";
+                                        echo "<td>" . $row['student_no'] . "</td>";
+                                        echo "<td>" . $row['last_name'] . "</td>";
+                                        echo "<td>" . $row['first_name'] . "</td>";
+                                        echo "<td>" . $row['mi'] . "</td>";
+                                        echo "<td>" . $row['year_level'] . "</td>";
+                                        echo "<td>" . $row['section'] . "</td>";
+                                        echo "<td>" . $row['address'] . ", " . $row['city'] . ", " . $row['province'] . "</td>";
+                                        echo "<td>
+                                                <button class='action-btn'>
+                                                    <i class='fas fa-edit'></i>
+                                                </button>
+                                            </td>";
+                                        echo "</tr>";
+                                        $counter++;
+                                    }
+                                } else {
+                                    echo "<tr><td colspan='10' style='text-align: center; padding: 20px;'>
+                                            <i class='fas fa-info-circle' style='margin-right: 10px; color: #666;'></i>No results were found
+                                          </td></tr>";
+                                }
+                                ?>
                             </tbody>
                         </table>
                     </div>
@@ -567,6 +717,120 @@ if (!isset($_SESSION["username"])) {
         </div>
     </div>
 
+    <div id="addStudentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Student Record</h2>
+            </div>
+            <div id="alertMessage" class="alert"></div>
+            <form id="addStudentForm" action="process/add_student.php" method="POST">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="student_no">Student Number</label>
+                        <input type="text" id="student_no" name="student_no" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="academic_status">Academic Status</label>
+                        <select id="academic_status" name="academic_status" required>
+                            <option value="Regular">Regular</option>
+                            <option value="Irregular">Irregular</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <input type="text" id="last_name" name="last_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                        <input type="text" id="first_name" name="first_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mi">Middle Initial</label>
+                        <input type="text" id="mi" name="mi" maxlength="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender" name="gender" required>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="birthday">Birthday</label>
+                        <input type="date" id="birthday" name="birthday" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="year_level">Year Level</label>
+                        <select id="year_level" name="year_level" required>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="section">Section</label>
+                        <select id="section" name="section" required>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                            <option value="E">E</option>
+                            <option value="F">F</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="academic">Academic Year</label>
+                        <select name="academic_year" id="academic" required>
+                            <option value="2024-2025">2024-2025</option>
+                            <option value="2023-2024">2023-2024</option>
+                            <option value="2022-2023">2022-2023</option>
+                            <option value="2021-2022">2021-2022</option>
+                            <option value="2020-2021">2020-2021</option>
+                            <option value="2019-2020">2019-2020</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="semester">Semester</label>
+                        <select id="semester" name="semester" required>
+                            <option value="1st">1st Semester</option>
+                            <option value="2nd">2nd Semester</option>
+                            <option value="Mid-Year">Mid-Year</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="student_classification">Student Classification</label>
+                        <select id="student_classification" name="student_classification" required>
+                            <option value="New">New Student</option>
+                            <option value="Regular">Regular Student</option>
+                            <option value="Transferee">Transferee</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="address">Address</label>
+                    <input type="text" id="address" name="address" required>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input type="text" id="city" name="city" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="province">Province</label>
+                        <input type="text" id="province" name="province" required>
+                    </div>
+                </div>
+                <div class="form-buttons" style="text-align: center;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <!-- <button type="submit" class="btn btn-primary">Save Student</button> -->
+                    <input type="submit" class="btn btn-primary" value="Save Student">
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const params = new URLSearchParams(window.location.search);
@@ -598,6 +862,30 @@ if (!isset($_SESSION["username"])) {
             const sections = document.querySelectorAll('.section');
             sections.forEach(section => section.classList.remove('active'));
             document.getElementById(sectionId).classList.add('active');
+        }
+
+        const modal = document.getElementById('addStudentModal');
+        const span = document.querySelector('.close');
+        const addStudentForm = document.getElementById('addStudentForm');
+        const alertMessage = document.getElementById('alertMessage');
+
+        // Update the New Student Record button to open modal
+        document.querySelector('.action-buttons').addEventListener('click', function () {
+            modal.style.display = 'block';
+        });
+
+        // span.onclick = closeModal;
+        // window.onclick = function(event) {
+        //     if (event.target == modal) {
+        //         closeModal();
+        //     }
+        // }
+
+        function closeModal() {
+            modal.style.display = 'none';
+            addStudentForm.reset();
+            alertMessage.style.display = 'none';
+            alertMessage.className = 'alert';
         }
     </script>
 </body>
