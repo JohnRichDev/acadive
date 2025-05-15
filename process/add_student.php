@@ -43,7 +43,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     //echo "City: $city<br>";
     //echo "Province: $province<br>";
 
-    // Prepare the SQL query
     $query = "INSERT INTO students (
          student_no, academic_status, last_name, first_name, mi, 
          gender, birthday, year_level, section, academic, 
@@ -54,14 +53,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
          '$semester', '$student_classification', '$address', '$city', '$province'
      )";
 
-    // Execute the query
     if (mysqli_query($conn, $query)) {
-        // Redirect back to students page with success message
         $_SESSION["success"] = "Student added successfully";
         header("Location: ../index.php?section=students");
         //echo "Student added successfully";
     } else {
-        // Redirect back with error message
         $_SESSION["error"] = "Error adding student: " . mysqli_error($conn);
         header("Location: ../index.php?section=students");
         //echo "Error: " . mysqli_error($conn);

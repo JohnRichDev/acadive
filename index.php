@@ -579,22 +579,23 @@ if (!isset($_SESSION["username"])) {
             </div>
         </div>
 
-        <div id="students" class="section"> <?php
-        if (isset($_SESSION["success"])) {
-            echo '<div class="alert alert-success" style="display: flex; align-items: center; background-color: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #c3e6cb;">
+        <div id="students" class="section">
+            <?php
+            if (isset($_SESSION["success"])) {
+                echo '<div class="alert alert-success" style="display: flex; align-items: center; background-color: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #c3e6cb;">
                     <i class="fas fa-check-circle" style="margin-right: 10px; font-size: 1.2em;"></i>
                     <span style="flex: 1;">' . htmlspecialchars($_SESSION["success"]) . '</span>
                 </div>';
-            unset($_SESSION["success"]);
-        }
-        if (isset($_SESSION["error"])) {
-            echo '<div class="alert alert-error" style="display: flex; align-items: center; background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #f5c6cb;">
+                unset($_SESSION["success"]);
+            }
+            if (isset($_SESSION["error"])) {
+                echo '<div class="alert alert-error" style="display: flex; align-items: center; background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #f5c6cb;">
                     <i class="fas fa-exclamation-circle" style="margin-right: 10px; font-size: 1.2em;"></i>
                     <span style="flex: 1;">' . htmlspecialchars($_SESSION["error"]) . '</span>
                 </div>';
-            unset($_SESSION["error"]);
-        }
-        ?>
+                unset($_SESSION["error"]);
+            }
+            ?>
             <div class="filters-bar">
                 <div class="search-filter">
                     <input type="text" placeholder="Search Students...">
