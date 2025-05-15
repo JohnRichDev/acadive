@@ -539,15 +539,37 @@ if (!isset($_SESSION["username"])) {
                 <div class="grid">
                     <div class="card stats-card hov">
                         <h3><i class="fas fa-users"></i> Total Students</h3>
-                        <div class="count">326</div>
+                        <div class="count">
+                            <?php
+                            include("database/connection.php");
+                            $query = "SELECT COUNT(*) as total FROM students";
+                            $result = mysqli_query($conn, $query);
+                            $row = mysqli_fetch_assoc($result);
+                            echo $row['total'];
+                            ?>
+                        </div>
                     </div>
                     <div class="card stats-card hov">
                         <h3><i class="fas fa-male"></i> Total Male</h3>
-                        <div class="count">200</div>
+                        <div class="count">
+                            <?php
+                            $query = "SELECT COUNT(*) as total FROM students WHERE gender = 'Male'";
+                            $result = mysqli_query($conn, $query);
+                            $row = mysqli_fetch_assoc($result);
+                            echo $row['total'];
+                            ?>
+                        </div>
                     </div>
                     <div class="card stats-card hov">
                         <h3><i class="fas fa-female"></i> Total Female</h3>
-                        <div class="count">126</div>
+                        <div class="count">
+                            <?php
+                            $query = "SELECT COUNT(*) as total FROM students WHERE gender = 'Female'";
+                            $result = mysqli_query($conn, $query);
+                            $row = mysqli_fetch_assoc($result);
+                            echo $row['total'];
+                            ?>
+                        </div>
                     </div>
                 </div>
 
@@ -637,10 +659,8 @@ if (!isset($_SESSION["username"])) {
                             </thead>
                             <tbody>
                                 <?php
-                                // Include database connection
                                 include("database/connection.php");
 
-                                // Query to fetch all students
                                 $query = "SELECT * FROM students ORDER BY last_name ASC";
                                 $result = mysqli_query($conn, $query);
 
@@ -869,7 +889,6 @@ if (!isset($_SESSION["username"])) {
         const addStudentForm = document.getElementById('addStudentForm');
         const alertMessage = document.getElementById('alertMessage');
 
-        // Update the New Student Record button to open modal
         document.querySelector('.action-buttons').addEventListener('click', function () {
             modal.style.display = 'block';
         });
