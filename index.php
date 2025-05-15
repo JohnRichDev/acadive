@@ -569,9 +569,6 @@ if (!isset($_SESSION["username"])) {
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const activeSection = '<?php echo $_SESSION["active_section"]; ?>';
-            showSection(activeSection);
-
             const params = new URLSearchParams(window.location.search);
             const section = params.get('section') || 'dashboard';
             showSection(section);
