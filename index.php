@@ -14,7 +14,7 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
     <meta charset="UTF-8">
     <title>Acadive</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <script src="https://kit.fontawesome.com/45304bf22c.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -378,7 +378,7 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
         .modal-content {
             background-color: #fefefe;
             margin: 5% auto;
-            padding: 20px;
+            padding: 30px;
             border-radius: 8px;
             width: 80%;
             max-width: 800px;
@@ -426,6 +426,7 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
             width: 100%;
             padding: 8px;
             border: 1px solid #ddd;
+            box-sizing: border-box;
             border-radius: 4px;
             font-size: 14px;
         }
@@ -482,7 +483,7 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
 </head>
 
 <body>
-    <div id="preloader" style="display:none;">
+    <div id="preloader">
         <img src="img/logo_invert.svg" alt="Acadive Logo" class="preloader-logo">
     </div>
 
@@ -557,7 +558,7 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
                 <h2>Add New Student Record</h2>
             </div>
             <div id="alertMessage" class="alert"></div>
-            <form id="addStudentForm" action="process/add_student.php" method="POST">
+            <form id="addStudentForm" action="process/add_student.php" method="POST" enctype="multipart/form-data">
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="student_no">Student Number</label>
@@ -601,6 +602,8 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
                             <option value="2">2nd Year</option>
                             <option value="3">3rd Year</option>
                             <option value="4">4th Year</option>
+                            <option value="5">5rd Year</option>
+                            <option value="6">6th Year</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -640,6 +643,10 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
                             <option value="Regular">Regular Student</option>
                             <option value="Transferee">Transferee</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="profile_image">Profile Image</label>
+                        <input type="file" id="profile_image" name="profile_image" accept="image/*">
                     </div>
                 </div>
                 <div class="form-group">

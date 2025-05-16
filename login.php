@@ -2,7 +2,7 @@
 <html lang="en">
 
 <?php
-// check already logged in
+
 session_start();
 if (isset($_SESSION["username"])) {
   header("Location: index.php");

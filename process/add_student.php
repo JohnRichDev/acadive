@@ -1,15 +1,12 @@
 <?php
-// check if the user is logged in
 include("../database/connection.php");
 session_start();
 if (!isset($_SESSION['username'])) {
     header('Location: ../login.php');
     exit();
 }
-
-// check if the form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // get the form data    $student_no = $_POST["student_no"];
+
     $student_no = $_POST["student_no"];
     $academic_status = $_POST["academic_status"];
     $last_name = $_POST["last_name"];
@@ -25,42 +22,50 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $address = $_POST["address"];
     $city = $_POST["city"];
     $province = $_POST["province"];
+    $adviser_id = null;
+    if (isset($_SESSION['user_id'])) {
+        $adviser_id = $_SESSION['user_id'];
+    }
 
-    // print all
-    //echo "Student No: $student_no<br>";
-    //echo "Academic Status: $academic_status<br>";
-    //echo "Last Name: $last_name<br>";
-    //echo "First Name: $first_name<br>";
-    //echo "Middle Initial: $mi<br>";
-    //echo "Gender: $gender<br>";
-    //echo "Birthday: $birthday<br>";
-    //echo "Year Level: $year_level<br>";
-    //echo "Section: $section<br>";
-    //echo "Academic: $academic<br>";
-    //echo "Semester: $semester<br>";
-    //echo "Student Classification: $student_classification<br>";
-    //echo "Address: $address<br>";
-    //echo "City: $city<br>";
-    //echo "Province: $province<br>";
+    $profile_image = null;
+    if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
+        $fileTmpPath = $_FILES['profile_image']['tmp_name'];
+        $fileName = $_FILES['profile_image']['name'];
+        $fileSize = $_FILES['profile_image']['size'];
+        $fileType = $_FILES['profile_image']['type'];
+        $fileNameCmps = explode('.', $fileName);
+        $fileExtension = strtolower(end($fileNameCmps));
+        $allowedfileExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        if (in_array($fileExtension, $allowedfileExtensions)) {
+            $adviserFolder = $adviser_id ? $adviser_id : 'unknown';
+            $uploadFileDir = '../img/student_1x1/' . $adviserFolder . '/';
+            if (!is_dir($uploadFileDir)) {
+                mkdir($uploadFileDir, 0777, true);
+            }
+            $newFileName = uniqid('stud_', true) . '.' . $fileExtension;
+            $dest_path = $uploadFileDir . $newFileName;
+            if (move_uploaded_file($fileTmpPath, $dest_path)) {
+                $profile_image = 'img/student_1x1/' . $adviserFolder . '/' . $newFileName;
+            }
+        }
+    }
 
     $query = "INSERT INTO students (
-         student_no, academic_status, last_name, first_name, mi, 
+         student_no, academic_status, last_name, first_name, mi, profile_image,
          gender, birthday, year_level, section, academic, 
-         semester, student_classification, address, city, province
+         semester, student_classification, address, city, province, adviser_id
      ) VALUES (
          '$student_no', '$academic_status', '$last_name', '$first_name', '$mi',
+         " . ($profile_image ? "'$profile_image'" : "NULL") . ",
          '$gender', '$birthday', $year_level, '$section', '$academic',
-         '$semester', '$student_classification', '$address', '$city', '$province'
+         '$semester', '$student_classification', '$address', '$city', '$province', " . ($adviser_id ? $adviser_id : "NULL") . "
      )";
-
     if (mysqli_query($conn, $query)) {
         $_SESSION["success"] = "Student added successfully";
         header("Location: ../index.php?section=students");
-        //echo "Student added successfully";
     } else {
         $_SESSION["error"] = "Error adding student: " . mysqli_error($conn);
         header("Location: ../index.php?section=students");
-        //echo "Error: " . mysqli_error($conn);
     }
     exit();
 }

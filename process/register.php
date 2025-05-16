@@ -31,7 +31,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (mysqli_query($conn, $query)) {
         $_SESSION["username"] = $username;
-        // $_SESSION["success"] = "Registration successful! You can now log in.";
+        $_SESSION["user_id"] = mysqli_insert_id($conn);
+
         header("Location: ../index.php");
         exit;
     } else {

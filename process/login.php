@@ -19,6 +19,7 @@ if (mysqli_num_rows($result) > 0) {
 
     if (password_verify($password, $row["password"])) {
         $_SESSION["username"] = $username;
+        $_SESSION["user_id"] = $row["id"];
         header("Location: ../index.php");
         exit;
     }

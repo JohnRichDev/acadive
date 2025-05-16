@@ -1,6 +1,15 @@
 <?php
-
 ?>
+<style>
+    .stud-avatar img {
+        width: 48px;
+        height: 48px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 2px solid #e0e0e0;
+        background: #f5f5f5;
+    }
+</style>
 <div class="section-content">
     <?php
     if (isset($_SESSION["success"])) {
@@ -20,37 +29,72 @@
     ?>
     <div class="filters-bar">
         <div class="search-filter">
-            <input type="text" placeholder="Search Students...">
-            <select>
-                <option value="all">All Years</option>
-                <option value="1">Year 1</option>
-                <option value="2">Year 2</option>
-                <option value="3">Year 3</option>
-                <option value="4">Year 4</option>
-                <option value="5">Year 5</option>
-                <option value="6">Year 6</option>
-            </select>
-            <select>
-                <option value="all">All Sections</option>
-                <option value="A">Section A</option>
-                <option value="B">Section B</option>
-                <option value="C">Section C</option>
-            </select>
+            <form id="filterForm" method="GET" action="" style="display: flex; gap: 15px; width: 100%;">
+                <input type="hidden" name="section" value="students">
+                <div style="position: relative; display: flex; align-items: center;">
+                    <input type="text" name="search" placeholder="Search Students..."
+                        value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>"
+                        style="padding-right: 40px;">
+                    <button type="submit"
+                        style="position: absolute; right: 5px; background: none; border: none; cursor: pointer; padding: 5px;">
+                        <i class="fas fa-search" style="color: #666;"></i>
+                    </button>
+                </div> <select name="academic_year" onchange="document.getElementById('filterForm').submit();"
+                    style="min-width: 170px;">
+                    <option value="">All Academic Years</option>
+                    <?php
+                    $currentYear = 2025;
+                    for ($i = 0; $i < 5; $i++) {
+                        $year = $currentYear - $i;
+                        $academicYear = ($year - 1) . "-" . $year;
+                        $selected = (isset($_GET['academic_year']) && $_GET['academic_year'] == $academicYear) ? 'selected' : '';
+                        echo "<option value=\"$academicYear\" $selected>$academicYear</option>";
+                    }
+                    ?>
+                </select>
+                <select name="semester" onchange="document.getElementById('filterForm').submit();"
+                    style="min-width: 150px;">
+                    <option value="">All Semesters</option>
+                    <?php $semesters = [
+                        '1st' => '1st Semester',
+                        '2nd' => '2nd Semester'
+                    ];
+                    foreach ($semesters as $value => $label) {
+                        $selected = (isset($_GET['semester']) && $_GET['semester'] == $value) ? 'selected' : '';
+                        echo "<option value=\"$value\" $selected>$label</option>";
+                    }
+                    ?>
+                </select>
+            </form>
         </div>
-    </div>
-
-    <h2>List of Students (A.Y 2024-2025 2nd Semester)</h2>
+    </div>    <h2>List of Students (A.Y <?php
+    $displayAcademic = isset($_GET['academic_year']) && !empty($_GET['academic_year']) ? $_GET['academic_year'] : '2024-2025';
+    $displaySemester = isset($_GET['semester']) && !empty($_GET['semester']) ?
+        ($semesters[$_GET['semester']] ?? '2nd Semester')
+        : '2nd Semester';
+    echo $displayAcademic . ' ' . $displaySemester;
+    ?>)</h2>
     <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <div style="display: flex; align-items: center;">
-                <span style="margin-right: 10px;">Sort by:</span>
-                <div style="position: relative; display: inline-block;">
-                    <select
+            <div style="display: flex; align-items: center;"> <span style="margin-right: 10px;">Sort by:</span>
+                <div style="position: relative; display: inline-block;"> <select name="sort" form="filterForm"
+                        onchange="document.getElementById('filterForm').submit();"
                         style="padding: 8px 30px 8px 10px; border-radius: 4px; border: 1px solid #ddd; appearance: none;">
-                        <option>Year</option>
-                        <option>Name</option>
-                        <option>Section</option>
-                        <option>Student No</option>
+                        <?php
+                        $currentSort = isset($_GET['sort']) ? $_GET['sort'] : 'name_asc';
+                        $sortOptions = [
+                            'name_asc' => 'Name (A-Z)',
+                            'name_desc' => 'Name (Z-A)',
+                            'year_asc' => 'Year (Low to High)',
+                            'year_desc' => 'Year (High to Low)',
+                            'section_asc' => 'Section (A-Z)',
+                            'section_desc' => 'Section (Z-A)'
+                        ];
+                        foreach ($sortOptions as $value => $label) {
+                            $selected = ($currentSort == $value) ? 'selected' : '';
+                            echo "<option value=\"$value\" $selected>$label</option>";
+                        }
+                        ?>
                     </select>
                     <i class="fas fa-chevron-down"
                         style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #666;"></i>
@@ -82,26 +126,77 @@
                     <?php
                     include("database/connection.php");
 
-                    $query = "SELECT * FROM students ORDER BY last_name ASC";
-                    $result = mysqli_query($conn, $query);
+                    $query = "SELECT * FROM students WHERE 1=1";
+                    $params = [];
+
+                    if (isset($_GET['search']) && !empty($_GET['search'])) {
+                        $search = '%' . $_GET['search'] . '%';
+                        $query .= " AND (student_no LIKE ? OR last_name LIKE ? OR first_name LIKE ? OR mi LIKE ?)";
+                        $params[] = $search;
+                        $params[] = $search;
+                        $params[] = $search;
+                        $params[] = $search;
+                    }
+                    if (isset($_GET['academic_year']) && !empty($_GET['academic_year'])) {
+                        $query .= " AND academic = ?";
+                        $params[] = $_GET['academic_year'];
+                    }
+
+                    if (isset($_GET['semester']) && !empty($_GET['semester'])) {
+                        $query .= " AND semester = ?";
+                        $params[] = $_GET['semester'];
+                    }
+
+                    $sort = isset($_GET['sort']) ? $_GET['sort'] : 'year_asc';
+                    switch ($sort) {
+                        case 'name_asc':
+                            $query .= " ORDER BY last_name ASC, first_name ASC";
+                            break;
+                        case 'name_desc':
+                            $query .= " ORDER BY last_name DESC, first_name DESC";
+                            break;
+                        case 'year_asc':
+                            $query .= " ORDER BY year_level ASC";
+                            break;
+                        case 'year_desc':
+                            $query .= " ORDER BY year_level DESC";
+                            break;
+                        case 'section_asc':
+                            $query .= " ORDER BY section ASC";
+                            break;
+                        case 'section_desc':
+                            $query .= " ORDER BY section DESC";
+                            break;
+                        default:
+                            $query .= " ORDER BY last_name ASC, first_name ASC";
+                    }
+
+                    $stmt = mysqli_prepare($conn, $query);
+                    if (!empty($params)) {
+                        $types = str_repeat('s', count($params));
+                        mysqli_stmt_bind_param($stmt, $types, ...$params);
+                    }
+                    mysqli_stmt_execute($stmt);
+                    $result = mysqli_stmt_get_result($stmt);
 
                     if (mysqli_num_rows($result) > 0) {
                         $counter = 1;
                         while ($row = mysqli_fetch_assoc($result)) {
                             echo "<tr>";
                             echo "<td>" . $counter . "</td>";
+                            $imgSrc = !empty($row['profile_image']) ? $row['profile_image'] : 'img/person.png';
                             echo "<td>
                                     <div class='stud-avatar'>
-                                        <img src='img/person.png' alt='Student Photo'>
+                                        <img src='" . $imgSrc . "' alt='Student Photo'>
                                     </div>
                                 </td>";
-                            echo "<td>" . $row['student_no'] . "</td>";
-                            echo "<td>" . $row['last_name'] . "</td>";
-                            echo "<td>" . $row['first_name'] . "</td>";
-                            echo "<td>" . $row['mi'] . "</td>";
-                            echo "<td>" . $row['year_level'] . "</td>";
-                            echo "<td>" . $row['section'] . "</td>";
-                            echo "<td>" . $row['address'] . ", " . $row['city'] . ", " . $row['province'] . "</td>";
+                            echo "<td>" . htmlspecialchars($row['student_no']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['last_name']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['first_name']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['mi']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['year_level']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['section']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['address'] . ", " . $row['city'] . ", " . $row['province']) . "</td>";
                             echo "<td>
                                     <button class='action-btn'>
                                         <i class='fas fa-edit'></i>
@@ -115,6 +210,7 @@
                                 <i class='fas fa-info-circle' style='margin-right: 10px; color: #666;'></i>No results were found
                               </td></tr>";
                     }
+                    mysqli_stmt_close($stmt);
                     ?>
                 </tbody>
             </table>
