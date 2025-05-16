@@ -45,16 +45,19 @@
             <div style="display: flex; align-items: center;">
                 <span style="margin-right: 10px;">Sort by:</span>
                 <div style="position: relative; display: inline-block;">
-                    <select style="padding: 8px 30px 8px 10px; border-radius: 4px; border: 1px solid #ddd; appearance: none;">
+                    <select
+                        style="padding: 8px 30px 8px 10px; border-radius: 4px; border: 1px solid #ddd; appearance: none;">
                         <option>Year</option>
                         <option>Name</option>
                         <option>Section</option>
                         <option>Student No</option>
                     </select>
-                    <i class="fas fa-chevron-down" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #666;"></i>
+                    <i class="fas fa-chevron-down"
+                        style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #666;"></i>
                 </div>
             </div>
-            <a href="index.php?section=students&showModal=addStudent" class="btn btn-primary" style="padding: 8px 15px; display: flex; align-items: center; gap: 5px; border-radius: 4px; cursor: pointer; text-decoration: none;">
+            <a href="index.php?section=students&showModal=addStudent" class="btn btn-primary"
+                style="padding: 8px 15px; display: flex; align-items: center; gap: 5px; border-radius: 4px; cursor: pointer; text-decoration: none;">
                 <i class="fas fa-plus"></i> New Student Record
             </a>
         </div>
@@ -129,11 +132,16 @@
                 <span>entries</span>
             </div>
             <div style="display: flex; gap: 5px;">
-                <button style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">Previous</button>
-                <button style="padding: 6px 12px; background: #1c3d7a; color: white; border: none; border-radius: 4px; cursor: pointer;">1</button>
-                <button style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">2</button>
-                <button style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">3</button>
-                <button style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">Next</button>
+                <button
+                    style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">Previous</button>
+                <button
+                    style="padding: 6px 12px; background: #1c3d7a; color: white; border: none; border-radius: 4px; cursor: pointer;">1</button>
+                <button
+                    style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">2</button>
+                <button
+                    style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">3</button>
+                <button
+                    style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">Next</button>
             </div>
         </div>
     </div>
