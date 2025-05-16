@@ -7,6 +7,7 @@ if (!isset($_SESSION["username"])) {
     header("Location: login.php");
     exit;
 }
+$currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
 ?>
 
 <head>
@@ -30,7 +31,7 @@ if (!isset($_SESSION["username"])) {
             width: 100%;
             height: 100%;
             background-color: #0a1f44;
-            display: flex;
+            display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -437,7 +438,7 @@ if (!isset($_SESSION["username"])) {
 
         .form-buttons {
             margin-top: 20px;
-            text-align: right;
+            text-align: center;
         }
 
         .btn {
@@ -481,22 +482,31 @@ if (!isset($_SESSION["username"])) {
 </head>
 
 <body>
-    <div id="preloader">
+    <div id="preloader" style="display:none;">
         <img src="img/logo_invert.svg" alt="Acadive Logo" class="preloader-logo">
     </div>
 
     <div id="sidebar">
         <img class="logo" draggable="false" src="img/logo_invert.svg" alt="Acadive Logo" />
         <div style="margin-top: 20px;">
-            <button onclick="navigateToSection('dashboard')">
-                <i class="fas fa-tachometer-alt"></i> Dashboard
-            </button>
-            <button onclick="navigateToSection('students')">
-                <i class="fas fa-users"></i> Student
-            </button>
-            <button onclick="navigateToSection('account')">
-                <i class="fas fa-cogs"></i> Account
-            </button>
+            <a href="?section=dashboard" style="text-decoration:none;">
+                <button type="button" style="width:100%;text-align:left;"
+                    class="<?php echo ($currentSection === 'dashboard') ? 'active' : ''; ?>">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </button>
+            </a>
+            <a href="?section=students" style="text-decoration:none;">
+                <button type="button" style="width:100%;text-align:left;"
+                    class="<?php echo ($currentSection === 'students') ? 'active' : ''; ?>">
+                    <i class="fas fa-users"></i> Student
+                </button>
+            </a>
+            <a href="?section=account" style="text-decoration:none;">
+                <button type="button" style="width:100%;text-align:left;"
+                    class="<?php echo ($currentSection === 'account') ? 'active' : ''; ?>">
+                    <i class="fas fa-cogs"></i> Account
+                </button>
+            </a>
         </div>
         <hr
             style="margin-top: 20px; margin-bottom: 20px; background-color:rgb(105, 105, 105); height: 2px; border: none;">
@@ -533,212 +543,15 @@ if (!isset($_SESSION["username"])) {
             </div>
         </div>
 
-        <div id="dashboard" class="section">
-            <div class="section-content">
-                <h2>Dashboard Overview</h2>
-                <div class="grid">
-                    <div class="card stats-card hov">
-                        <h3><i class="fas fa-users"></i> Total Students</h3>
-                        <div class="count">
-                            <?php
-                            include("database/connection.php");
-                            $query = "SELECT COUNT(*) as total FROM students";
-                            $result = mysqli_query($conn, $query);
-                            $row = mysqli_fetch_assoc($result);
-                            echo $row['total'];
-                            ?>
-                        </div>
-                    </div>
-                    <div class="card stats-card hov">
-                        <h3><i class="fas fa-male"></i> Total Male</h3>
-                        <div class="count">
-                            <?php
-                            $query = "SELECT COUNT(*) as total FROM students WHERE gender = 'Male'";
-                            $result = mysqli_query($conn, $query);
-                            $row = mysqli_fetch_assoc($result);
-                            echo $row['total'];
-                            ?>
-                        </div>
-                    </div>
-                    <div class="card stats-card hov">
-                        <h3><i class="fas fa-female"></i> Total Female</h3>
-                        <div class="count">
-                            <?php
-                            $query = "SELECT COUNT(*) as total FROM students WHERE gender = 'Female'";
-                            $result = mysqli_query($conn, $query);
-                            $row = mysqli_fetch_assoc($result);
-                            echo $row['total'];
-                            ?>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3><i class="fas fa-chart-pie"></i> Statistics</h3>
-                </div>
-            </div>
-        </div>
-
-        <div id="students" class="section">
+        <div class="section active">
             <?php
-            if (isset($_SESSION["success"])) {
-                echo '<div class="alert alert-success" style="display: flex; align-items: center; background-color: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #c3e6cb;">
-                    <i class="fas fa-check-circle" style="margin-right: 10px; font-size: 1.2em;"></i>
-                    <span style="flex: 1;">' . htmlspecialchars($_SESSION["success"]) . '</span>
-                </div>';
-                unset($_SESSION["success"]);
-            }
-            if (isset($_SESSION["error"])) {
-                echo '<div class="alert alert-error" style="display: flex; align-items: center; background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #f5c6cb;">
-                    <i class="fas fa-exclamation-circle" style="margin-right: 10px; font-size: 1.2em;"></i>
-                    <span style="flex: 1;">' . htmlspecialchars($_SESSION["error"]) . '</span>
-                </div>';
-                unset($_SESSION["error"]);
-            }
+            include './sections/' . $currentSection . '.php';
             ?>
-            <div class="filters-bar">
-                <div class="search-filter">
-                    <input type="text" placeholder="Search Students...">
-                    <select>
-                        <option value="all">All Years</option>
-                        <option value="1">Year 1</option>
-                        <option value="2">Year 2</option>
-                        <option value="3">Year 3</option>
-                        <option value="4">Year 4</option>
-                        <option value="5">Year 5</option>
-                        <option value="6">Year 6</option>
-                    </select>
-                    <select>
-                        <option value="all">All Sections</option>
-                        <option value="A">Section A</option>
-                        <option value="B">Section B</option>
-                        <option value="C">Section C</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="section-content">
-                <h2>List of Students (A.Y 2024-2025 2nd Semester)</h2>
-                <div class="card">
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <div style="display: flex; align-items: center;">
-                            <span style="margin-right: 10px;">Sort by:</span>
-                            <div style="position: relative; display: inline-block;">
-                                <select
-                                    style="padding: 8px 30px 8px 10px; border-radius: 4px; border: 1px solid #ddd; appearance: none;">
-                                    <option>Year</option>
-                                    <option>Name</option>
-                                    <option>Section</option>
-                                    <option>Student No</option>
-                                </select>
-                                <i class="fas fa-chevron-down"
-                                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #666;"></i>
-                            </div>
-                        </div>
-                        <button class="action-buttons"
-                            style="padding: 8px 15px; display: flex; align-items: center; gap: 5px; border-radius: 4px; cursor: pointer;">
-                            <i class="fas fa-plus"></i> New Student Record
-                        </button>
-                    </div>
-
-                    <div style="overflow-x: auto;">
-                        <table class="student-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 50px;">No</th>
-                                    <th style="width: 70px;">Pic</th>
-                                    <th>Student No</th>
-                                    <th>Last Name</th>
-                                    <th>First Name</th>
-                                    <th style="width: 50px;">MI</th>
-                                    <th style="width: 70px;">Year</th>
-                                    <th style="width: 70px;">Section</th>
-                                    <th>Address</th>
-                                    <th style="width: 80px;">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                include("database/connection.php");
-
-                                $query = "SELECT * FROM students ORDER BY last_name ASC";
-                                $result = mysqli_query($conn, $query);
-
-                                if (mysqli_num_rows($result) > 0) {
-                                    $counter = 1;
-                                    while ($row = mysqli_fetch_assoc($result)) {
-                                        echo "<tr>";
-                                        echo "<td>" . $counter . "</td>";
-                                        echo "<td>
-                                                <div class='stud-avatar'>
-                                                    <img src='img/person.png' alt='Student Photo'>
-                                                </div>
-                                            </td>";
-                                        echo "<td>" . $row['student_no'] . "</td>";
-                                        echo "<td>" . $row['last_name'] . "</td>";
-                                        echo "<td>" . $row['first_name'] . "</td>";
-                                        echo "<td>" . $row['mi'] . "</td>";
-                                        echo "<td>" . $row['year_level'] . "</td>";
-                                        echo "<td>" . $row['section'] . "</td>";
-                                        echo "<td>" . $row['address'] . ", " . $row['city'] . ", " . $row['province'] . "</td>";
-                                        echo "<td>
-                                                <button class='action-btn'>
-                                                    <i class='fas fa-edit'></i>
-                                                </button>
-                                            </td>";
-                                        echo "</tr>";
-                                        $counter++;
-                                    }
-                                } else {
-                                    echo "<tr><td colspan='10' style='text-align: center; padding: 20px;'>
-                                            <i class='fas fa-info-circle' style='margin-right: 10px; color: #666;'></i>No results were found
-                                          </td></tr>";
-                                }
-                                ?>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span>Show</span>
-                            <select style="padding: 6px; border-radius: 4px; border: 1px solid #ddd;">
-                                <option>10</option>
-                                <option>25</option>
-                                <option>50</option>
-                                <option>100</option>
-                            </select>
-                            <span>entries</span>
-                        </div>
-                        <div style="display: flex; gap: 5px;">
-                            <button
-                                style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">Previous</button>
-                            <button
-                                style="padding: 6px 12px; background: #1c3d7a; color: white; border: none; border-radius: 4px; cursor: pointer;">1</button>
-                            <button
-                                style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">2</button>
-                            <button
-                                style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">3</button>
-                            <button
-                                style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">Next</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="account" class="section">
-            <div class="section-content">
-                <h2>Account Settings</h2>
-                <div class="card">
-                    <p>[User account details, login info, update password, etc]</p>
-                </div>
-            </div>
         </div>
     </div>
 
-    <div id="addStudentModal" class="modal">
+    <div id="addStudentModal" class="modal"
+        style="<?php echo (isset($_GET['showModal']) && $_GET['showModal'] === 'addStudent') ? 'display:block;' : 'display:none;'; ?>">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Add New Student Record</h2>
@@ -844,70 +657,14 @@ if (!isset($_SESSION["username"])) {
                     </div>
                 </div>
                 <div class="form-buttons" style="text-align: center;">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <!-- <button type="submit" class="btn btn-primary">Save Student</button> -->
+                    <a href="?section=<?php echo $currentSection; ?>" class="btn btn-secondary"
+                        style="text-decoration:none;">Cancel</a>
                     <input type="submit" class="btn btn-primary" value="Save Student">
                 </div>
             </form>
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const params = new URLSearchParams(window.location.search);
-            const section = params.get('section') || 'dashboard';
-            showSection(section);
-
-            window.addEventListener('load', function () {
-                const preloader = document.getElementById('preloader');
-                setTimeout(function () {
-                    preloader.style.opacity = '0';
-                    // preloader.style.transform = 'translateY(-20px)';
-                    setTimeout(function () {
-                        preloader.style.display = 'none';
-                    }, 500);
-                }, 800);
-            });
-        });
-
-        function navigateToSection(sectionId) {
-            showSection(sectionId);
-            if (sectionId !== 'dashboard') {
-                history.pushState(null, '', '?section=' + sectionId);
-            } else {
-                history.pushState(null, '', window.location.pathname);
-            }
-        }
-
-        function showSection(sectionId) {
-            const sections = document.querySelectorAll('.section');
-            sections.forEach(section => section.classList.remove('active'));
-            document.getElementById(sectionId).classList.add('active');
-        }
-
-        const modal = document.getElementById('addStudentModal');
-        const span = document.querySelector('.close');
-        const addStudentForm = document.getElementById('addStudentForm');
-        const alertMessage = document.getElementById('alertMessage');
-
-        document.querySelector('.action-buttons').addEventListener('click', function () {
-            modal.style.display = 'block';
-        });
-
-        // span.onclick = closeModal;
-        // window.onclick = function(event) {
-        //     if (event.target == modal) {
-        //         closeModal();
-        //     }
-        // }
-
-        function closeModal() {
-            modal.style.display = 'none';
-            addStudentForm.reset();
-            alertMessage.style.display = 'none';
-            alertMessage.className = 'alert';
-        }
-    </script>
 </body>
 
 </html>
