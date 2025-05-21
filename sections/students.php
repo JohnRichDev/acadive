@@ -67,7 +67,8 @@
                 </select>
             </form>
         </div>
-    </div>    <h2>List of Students (A.Y <?php
+    </div>
+    <h2>List of Students (A.Y <?php
     $displayAcademic = isset($_GET['academic_year']) && !empty($_GET['academic_year']) ? $_GET['academic_year'] : '2024-2025';
     $displaySemester = isset($_GET['semester']) && !empty($_GET['semester']) ?
         ($semesters[$_GET['semester']] ?? '2nd Semester')

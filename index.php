@@ -483,7 +483,7 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
 </head>
 
 <body>
-    <div id="preloader">
+    <div id="preloader" style="display:none;">
         <img src="img/logo_invert.svg" alt="Acadive Logo" class="preloader-logo">
     </div>
 
@@ -558,7 +558,7 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
                 <h2>Add New Student Record</h2>
             </div>
             <div id="alertMessage" class="alert"></div>
-            <form id="addStudentForm" action="process/add_student.php" method="POST" enctype="multipart/form-data">
+            <form id="addStudentForm" action="process/add_student.php" method="POST">
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="student_no">Student Number</label>
@@ -567,8 +567,8 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
                     <div class="form-group">
                         <label for="academic_status">Academic Status</label>
                         <select id="academic_status" name="academic_status" required>
-                            <option value="Regular">Regular</option>
-                            <option value="Irregular">Irregular</option>
+                            <option value="Officially enrolled">Officially enrolled</option>
+                            <option value="Dropped">Dropped</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -643,10 +643,6 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
                             <option value="Regular">Regular Student</option>
                             <option value="Transferee">Transferee</option>
                         </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="profile_image">Profile Image</label>
-                        <input type="file" id="profile_image" name="profile_image" accept="image/*">
                     </div>
                 </div>
                 <div class="form-group">
