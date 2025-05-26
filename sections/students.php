@@ -27,6 +27,7 @@
         unset($_SESSION["error"]);
     }
     ?>
+
     <div class="filters-bar">
         <div class="search-filter">
             <form id="filterForm" method="GET" action="" style="display: flex; gap: 15px; width: 100%;">
@@ -39,7 +40,8 @@
                         style="position: absolute; right: 5px; background: none; border: none; cursor: pointer; padding: 5px;">
                         <i class="fas fa-search" style="color: #666;"></i>
                     </button>
-                </div> <select name="academic_year" onchange="document.getElementById('filterForm').submit();"
+                </div>
+                <select name="academic_year" onchange="document.getElementById('filterForm').submit();"
                     style="min-width: 170px;">
                     <option value="">All Academic Years</option>
                     <?php
@@ -56,8 +58,8 @@
                     style="min-width: 150px;">
                     <option value="">All Semesters</option>
                     <?php $semesters = [
-                        '1st' => '1st Semester',
-                        '2nd' => '2nd Semester'
+                        '1st Semester' => '1st Semester',
+                        '2nd Semester' => '2nd Semester'
                     ];
                     foreach ($semesters as $value => $label) {
                         $selected = (isset($_GET['semester']) && $_GET['semester'] == $value) ? 'selected' : '';
@@ -68,6 +70,7 @@
             </form>
         </div>
     </div>
+
     <h2>List of Students (A.Y <?php
     $displayAcademic = isset($_GET['academic_year']) && !empty($_GET['academic_year']) ? $_GET['academic_year'] : '2024-2025';
     $displaySemester = isset($_GET['semester']) && !empty($_GET['semester']) ?
@@ -75,11 +78,13 @@
         : '2nd Semester';
     echo $displayAcademic . ' ' . $displaySemester;
     ?>)</h2>
-    <div class="card">
+
+    <div class="card" style="height: 50%">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <div style="display: flex; align-items: center;"> <span style="margin-right: 10px;">Sort by:</span>
-                <div style="position: relative; display: inline-block;"> <select name="sort" form="filterForm"
-                        onchange="document.getElementById('filterForm').submit();"
+            <div style="display: flex; align-items: center;">
+                <span style="margin-right: 10px;">Sort by:</span>
+                <div style="position: relative; display: inline-block;">
+                    <select name="sort" form="filterForm" onchange="document.getElementById('filterForm').submit();"
                         style="padding: 8px 30px 8px 10px; border-radius: 4px; border: 1px solid #ddd; appearance: none;">
                         <?php
                         $currentSort = isset($_GET['sort']) ? $_GET['sort'] : 'name_asc';
@@ -107,7 +112,7 @@
             </a>
         </div>
 
-        <div style="overflow-x: auto;">
+        <div class="students-table-container" style="height: 75%">
             <table class="student-table">
                 <thead>
                     <tr>
@@ -127,26 +132,50 @@
                     <?php
                     include("database/connection.php");
 
+                    $limit = isset($_GET['limit']) && is_numeric($_GET['limit']) ? (int) $_GET['limit'] : 10;
+                    $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+                    $offset = ($page - 1) * $limit;
+
+                    $countQuery = "SELECT COUNT(*) as total FROM students WHERE 1=1";
                     $query = "SELECT * FROM students WHERE 1=1";
                     $params = [];
 
                     if (isset($_GET['search']) && !empty($_GET['search'])) {
                         $search = '%' . $_GET['search'] . '%';
-                        $query .= " AND (student_no LIKE ? OR last_name LIKE ? OR first_name LIKE ? OR mi LIKE ?)";
+                        $searchCondition = " AND (student_no LIKE ? OR last_name LIKE ? OR first_name LIKE ? OR mi LIKE ?)";
+                        $countQuery .= $searchCondition;
+                        $query .= $searchCondition;
                         $params[] = $search;
                         $params[] = $search;
                         $params[] = $search;
                         $params[] = $search;
                     }
+
                     if (isset($_GET['academic_year']) && !empty($_GET['academic_year'])) {
-                        $query .= " AND academic = ?";
+                        $academicCondition = " AND academic = ?";
+                        $countQuery .= $academicCondition;
+                        $query .= $academicCondition;
                         $params[] = $_GET['academic_year'];
                     }
 
                     if (isset($_GET['semester']) && !empty($_GET['semester'])) {
-                        $query .= " AND semester = ?";
+                        $semesterCondition = " AND semester = ?";
+                        $countQuery .= $semesterCondition;
+                        $query .= $semesterCondition;
                         $params[] = $_GET['semester'];
                     }
+
+                    $countStmt = mysqli_prepare($conn, $countQuery);
+                    if (!empty($params)) {
+                        $types = str_repeat('s', count($params));
+                        mysqli_stmt_bind_param($countStmt, $types, ...$params);
+                    }
+                    mysqli_stmt_execute($countStmt);
+                    $countResult = mysqli_stmt_get_result($countStmt);
+                    $totalRecords = mysqli_fetch_assoc($countResult)['total'];
+                    mysqli_stmt_close($countStmt);
+
+                    $totalPages = ceil($totalRecords / $limit);
 
                     $sort = isset($_GET['sort']) ? $_GET['sort'] : 'year_asc';
                     switch ($sort) {
@@ -172,25 +201,31 @@
                             $query .= " ORDER BY last_name ASC, first_name ASC";
                     }
 
+                    $query .= " LIMIT ? OFFSET ?";
+
                     $stmt = mysqli_prepare($conn, $query);
                     if (!empty($params)) {
-                        $types = str_repeat('s', count($params));
-                        mysqli_stmt_bind_param($stmt, $types, ...$params);
+                        $types = str_repeat('s', count($params)) . 'ii';
+                        $allParams = array_merge($params, [$limit, $offset]);
+                        mysqli_stmt_bind_param($stmt, $types, ...$allParams);
+                    } else {
+                        mysqli_stmt_bind_param($stmt, 'ii', $limit, $offset);
                     }
+
                     mysqli_stmt_execute($stmt);
                     $result = mysqli_stmt_get_result($stmt);
 
                     if (mysqli_num_rows($result) > 0) {
-                        $counter = 1;
+                        $counter = $offset + 1;
                         while ($row = mysqli_fetch_assoc($result)) {
                             echo "<tr>";
                             echo "<td>" . $counter . "</td>";
-                            
-                            $adviser_id = $_SESSION['user_id'];
+
+                            $advisor_id = $_SESSION['user_id'];
                             $student_no = $row['student_no'];
                             $student_no = str_replace('-', '', $student_no);
                             $imgDir = 'img/student_1x1/';
-                            $imgBase = $adviser_id . '_' . $student_no;
+                            $imgBase = $advisor_id . '_' . $student_no;
                             $imgSrc = '';
                             $found = false;
                             $extensions = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
@@ -232,29 +267,97 @@
             </table>
         </div>
 
-        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <span>Show</span>
-                <select style="padding: 6px; border-radius: 4px; border: 1px solid #ddd;">
-                    <option>10</option>
-                    <option>25</option>
-                    <option>50</option>
-                    <option>100</option>
+                <select name="limit" form="filterForm" onchange="document.getElementById('filterForm').submit();"
+                    style="padding: 6px; border-radius: 4px; border: 1px solid #ddd;">
+                    <?php
+                    $limitOptions = [10, 25, 50, 100];
+                    foreach ($limitOptions as $option) {
+                        $selected = ($limit == $option) ? 'selected' : '';
+                        echo "<option value=\"$option\" $selected>$option</option>";
+                    }
+                    ?>
                 </select>
                 <span>entries</span>
+                <span style="margin-left: 20px; color: #666;">
+                    Showing <?php echo $offset + 1; ?> to <?php echo min($offset + $limit, $totalRecords); ?> of
+                    <?php echo $totalRecords; ?> entries
+                </span>
             </div>
-            <div style="display: flex; gap: 5px;">
-                <button
-                    style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">Previous</button>
-                <button
-                    style="padding: 6px 12px; background: #1c3d7a; color: white; border: none; border-radius: 4px; cursor: pointer;">1</button>
-                <button
-                    style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">2</button>
-                <button
-                    style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">3</button>
-                <button
-                    style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">Next</button>
-            </div>
+
+            <?php if ($totalPages > 1): ?>
+                <div style="display: flex; gap: 5px;">
+                    <?php if ($page > 1): ?>
+                        <a href="?<?php
+                        $prevParams = $_GET;
+                        $prevParams['page'] = $page - 1;
+                        echo http_build_query($prevParams);
+                        ?>"
+                            style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; text-decoration: none; color: #333;">
+                            Previous
+                        </a>
+                    <?php else: ?>
+                        <span
+                            style="padding: 6px 12px; background: #e9ecef; border: 1px solid #ddd; border-radius: 4px; color: #6c757d;">
+                            Previous
+                        </span>
+                    <?php endif; ?>
+
+                    <?php
+                    $startPage = max(1, $page - 2);
+                    $endPage = min($totalPages, $page + 2);
+
+                    if ($startPage > 1) {
+                        echo '<a href="?' . http_build_query(array_merge($_GET, ['page' => 1])) . '" style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; text-decoration: none; color: #333;">1</a>';
+                        if ($startPage > 2) {
+                            echo '<span style="padding: 6px 12px;">...</span>';
+                        }
+                    }
+
+                    for ($i = $startPage; $i <= $endPage; $i++):
+                        if ($i == $page): ?>
+                            <span style="padding: 6px 12px; background: #1c3d7a; color: white; border: none; border-radius: 4px;">
+                                <?php echo $i; ?>
+                            </span>
+                        <?php else: ?>
+                            <a href="?<?php
+                            $pageParams = $_GET;
+                            $pageParams['page'] = $i;
+                            echo http_build_query($pageParams);
+                            ?>"
+                                style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; text-decoration: none; color: #333;">
+                                <?php echo $i; ?>
+                            </a>
+                        <?php endif;
+                    endfor;
+
+                    if ($endPage < $totalPages) {
+                        if ($endPage < $totalPages - 1) {
+                            echo '<span style="padding: 6px 12px;">...</span>';
+                        }
+                        echo '<a href="?' . http_build_query(array_merge($_GET, ['page' => $totalPages])) . '" style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; text-decoration: none; color: #333;">' . $totalPages . '</a>';
+                    }
+                    ?>
+
+                    <?php if ($page < $totalPages): ?>
+                        <a href="?<?php
+                        $nextParams = $_GET;
+                        $nextParams['page'] = $page + 1;
+                        echo http_build_query($nextParams);
+                        ?>"
+                            style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; text-decoration: none; color: #333;">
+                            Next
+                        </a>
+                    <?php else: ?>
+                        <span
+                            style="padding: 6px 12px; background: #e9ecef; border: 1px solid #ddd; border-radius: 4px; color: #6c757d;">
+                            Next
+                        </span>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
