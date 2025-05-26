@@ -73,24 +73,14 @@
     </div>
 
     <h2>List of Students (A.Y <?php
-<<<<<<< HEAD
                                 $displayAcademic = isset($_GET['academic_year']) && !empty($_GET['academic_year']) ? $_GET['academic_year'] : '2024-2025';
                                 $displaySemester = isset($_GET['semester']) && !empty($_GET['semester']) ?
                                     ($semesters[$_GET['semester']] ?? '2nd Semester')
                                     : '2nd Semester';
                                 echo $displayAcademic . ' ' . $displaySemester;
                                 ?>)</h2>
-    <div class="card">
-=======
-    $displayAcademic = isset($_GET['academic_year']) && !empty($_GET['academic_year']) ? $_GET['academic_year'] : '2024-2025';
-    $displaySemester = isset($_GET['semester']) && !empty($_GET['semester']) ?
-        ($semesters[$_GET['semester']] ?? '2nd Semester')
-        : '2nd Semester';
-    echo $displayAcademic . ' ' . $displaySemester;
-    ?>)</h2>
 
     <div class="card" style="height: 50%">
->>>>>>> 1eaebd3a3bbb4f2a69253a636c0ee4528c788f04
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <div style="display: flex; align-items: center;">
                 <span style="margin-right: 10px;">Sort by:</span>
@@ -143,18 +133,6 @@
                     <?php
                     include("database/connection.php"); //
 
-<<<<<<< HEAD
-                    $query = "SELECT * FROM students WHERE 1=1"; //
-                    $params = []; //
-
-                    if (isset($_GET['search']) && !empty($_GET['search'])) {
-                        $search = '%' . $_GET['search'] . '%';
-                        $query .= " AND (student_no LIKE ? OR last_name LIKE ? OR first_name LIKE ? OR mi LIKE ?)"; //
-                        $params[] = $search; //
-                        $params[] = $search; //
-                        $params[] = $search; //
-                        $params[] = $search; //
-=======
                     $limit = isset($_GET['limit']) && is_numeric($_GET['limit']) ? (int) $_GET['limit'] : 10;
                     $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
                     $offset = ($page - 1) * $limit;
@@ -172,73 +150,9 @@
                         $params[] = $search;
                         $params[] = $search;
                         $params[] = $search;
->>>>>>> 1eaebd3a3bbb4f2a69253a636c0ee4528c788f04
                     }
 
                     if (isset($_GET['academic_year']) && !empty($_GET['academic_year'])) {
-<<<<<<< HEAD
-                        $query .= " AND academic = ?"; //
-                        $params[] = $_GET['academic_year']; //
-                    }
-
-                    if (isset($_GET['semester']) && !empty($_GET['semester'])) {
-                        $query .= " AND semester = ?"; //
-                        $params[] = $_GET['semester']; //
-                    }
-
-                    $sort = isset($_GET['sort']) ? $_GET['sort'] : 'year_asc'; //
-                    switch ($sort) { //
-                        case 'name_asc': //
-                            $query .= " ORDER BY last_name ASC, first_name ASC"; //
-                            break; //
-                        case 'name_desc': //
-                            $query .= " ORDER BY last_name DESC, first_name DESC"; //
-                            break; //
-                        case 'year_asc': //
-                            $query .= " ORDER BY year_level ASC"; //
-                            break; //
-                        case 'year_desc': //
-                            $query .= " ORDER BY year_level DESC"; //
-                            break; //
-                        case 'section_asc': //
-                            $query .= " ORDER BY section ASC"; //
-                            break; //
-                        case 'section_desc': //
-                            $query .= " ORDER BY section DESC"; //
-                            break; //
-                        default: //
-                            $query .= " ORDER BY last_name ASC, first_name ASC"; //
-                    }
-
-                    $stmt = mysqli_prepare($conn, $query); //
-                    if (!empty($params)) { //
-                        $types = str_repeat('s', count($params)); //
-                        mysqli_stmt_bind_param($stmt, $types, ...$params); //
-                    }
-                    mysqli_stmt_execute($stmt); //
-                    $result = mysqli_stmt_get_result($stmt); //
-
-                    if (mysqli_num_rows($result) > 0) { //
-                        $counter = 1; //
-                        while ($row = mysqli_fetch_assoc($result)) { //
-                            echo "<tr>"; //
-                            echo "<td>" . $counter . "</td>"; //
-
-                            $adviser_id = $_SESSION['user_id']; //
-                            $student_no = $row['student_no']; //
-                            $student_no = str_replace('-', '', $student_no); //
-                            $imgDir = 'img/student_1x1/'; //
-                            $imgBase = $adviser_id . '_' . $student_no; //
-                            $imgSrc = ''; //
-                            $found = false; //
-                            $extensions = ['png', 'jpg', 'jpeg', 'webp', 'gif']; //
-                            foreach ($extensions as $ext) { //
-                                $tryPath = $imgDir . $imgBase . '.' . $ext; //
-                                if (file_exists($tryPath)) { //
-                                    $imgSrc = $tryPath; //
-                                    $found = true; //
-                                    break; //
-=======
                         $academicCondition = " AND academic = ?";
                         $countQuery .= $academicCondition;
                         $query .= $academicCondition;
@@ -322,7 +236,6 @@
                                     $imgSrc = $tryPath;
                                     $found = true;
                                     break;
->>>>>>> 1eaebd3a3bbb4f2a69253a636c0ee4528c788f04
                                 }
                             }
                             if (!$found) { //
@@ -380,10 +293,10 @@
                 <div style="display: flex; gap: 5px;">
                     <?php if ($page > 1): ?>
                         <a href="?<?php
-                        $prevParams = $_GET;
-                        $prevParams['page'] = $page - 1;
-                        echo http_build_query($prevParams);
-                        ?>"
+                                    $prevParams = $_GET;
+                                    $prevParams['page'] = $page - 1;
+                                    echo http_build_query($prevParams);
+                                    ?>"
                             style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; text-decoration: none; color: #333;">
                             Previous
                         </a>
@@ -412,14 +325,14 @@
                             </span>
                         <?php else: ?>
                             <a href="?<?php
-                            $pageParams = $_GET;
-                            $pageParams['page'] = $i;
-                            echo http_build_query($pageParams);
-                            ?>"
+                                        $pageParams = $_GET;
+                                        $pageParams['page'] = $i;
+                                        echo http_build_query($pageParams);
+                                        ?>"
                                 style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; text-decoration: none; color: #333;">
                                 <?php echo $i; ?>
                             </a>
-                        <?php endif;
+                    <?php endif;
                     endfor;
 
                     if ($endPage < $totalPages) {
@@ -432,10 +345,10 @@
 
                     <?php if ($page < $totalPages): ?>
                         <a href="?<?php
-                        $nextParams = $_GET;
-                        $nextParams['page'] = $page + 1;
-                        echo http_build_query($nextParams);
-                        ?>"
+                                    $nextParams = $_GET;
+                                    $nextParams['page'] = $page + 1;
+                                    echo http_build_query($nextParams);
+                                    ?>"
                             style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; text-decoration: none; color: #333;">
                             Next
                         </a>
