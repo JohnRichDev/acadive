@@ -522,6 +522,109 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+
+        #content {
+            padding: 20px;
+            flex-grow: 1;
+            background-color: #f2f2f2;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .section-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .dashboard-graphs-container {
+            max-height: 600px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding-right: 10px;
+        }
+
+        .students-table-container {
+            max-height: 70vh;
+            overflow-y: auto;
+            border: 1px solid #e3e3e3;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .students-table-container .student-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .students-table-container .student-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: #f5f7fa;
+        }
+
+        .students-table-container .student-table th {
+            background-color: #f5f7fa;
+            color: #0a1f44;
+            font-weight: 600;
+            padding: 12px 15px;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #e3e3e3;
+            text-align: center;
+            position: sticky;
+            top: 0;
+        }
+
+        .section-content::-webkit-scrollbar,
+        .dashboard-graphs-container::-webkit-scrollbar,
+        .students-table-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .section-content::-webkit-scrollbar-track,
+        .dashboard-graphs-container::-webkit-scrollbar-track,
+        .students-table-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .section-content::-webkit-scrollbar-thumb,
+        .dashboard-graphs-container::-webkit-scrollbar-thumb,
+        .students-table-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .section-content::-webkit-scrollbar-thumb:hover,
+        .dashboard-graphs-container::-webkit-scrollbar-thumb:hover,
+        .students-table-container::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        .card.dashboard-main {
+            max-height: calc(100vh - 250px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dashboard-main .chart-flex-container {
+            display: flex;
+            flex: 1;
+            gap: 30px;
+            align-items: flex-start;
+            overflow-y: auto;
+            padding-right: 10px;
+            min-height: 300px;
+        }
+    </style>
     </style>
 </head>
 

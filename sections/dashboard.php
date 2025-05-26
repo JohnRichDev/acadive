@@ -178,8 +178,8 @@ if ($stmt) {
                     style="min-width: 150px;">
                     <option value="">All Semesters</option>
                     <?php $semesters = [
-                        '1st' => '1st Semester',
-                        '2nd' => '2nd Semester'
+                        '1st Semester' => '1st Semester',
+                        '2nd Semester' => '2nd Semester'
                     ];
                     foreach ($semesters as $value => $label) {
                         $selected = (isset($_GET['semester']) && $_GET['semester'] == $value) ? 'selected' : '';
@@ -191,7 +191,7 @@ if ($stmt) {
         </div>
     </div>
 
-    <div class="card" style="max-height: 600px; overflow-y: auto; display: flex; flex-direction: column;">
+    <div class="card dashboard-main">
         <div class="grid">
             <div class="card stats-card hov">
                 <h3><i class="fas fa-users"></i> Total Students</h3>
@@ -252,7 +252,8 @@ if ($stmt) {
                 </div>
             </div>
         </div>
-        <div style="display: flex; flex: 1; gap: 30px; align-items: flex-end;">
+
+        <div class="chart-flex-container">
             <div style="flex: 1; min-width: 280px; max-width: 400px;">
                 <h4>Student Demographics (Age)</h4>
                 <div style="position: relative; height: 250px; width: 100%;">
