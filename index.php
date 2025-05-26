@@ -800,9 +800,8 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
                     <div class="form-group">
                         <label for="student_classification">Student Classification</label>
                         <select id="student_classification" name="student_classification" required>
-                            <option value="New">New Student</option>
-                            <option value="Regular">Regular Student</option>
-                            <option value="Transferee">Transferee</option>
+                            <option value="Enrolled">Officially Enrolled</option>
+                            <option value="Dropped">Dropped</option>
                         </select>
                     </div>
                 </div>

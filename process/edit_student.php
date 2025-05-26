@@ -1,5 +1,4 @@
 <?php
-// acadive/process/edit_student.php
 include("../database/connection.php");
 session_start();
 
@@ -25,6 +24,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $address = mysqli_real_escape_string($conn, $_POST["address"]);
     $city = mysqli_real_escape_string($conn, $_POST["city"]);
     $province = mysqli_real_escape_string($conn, $_POST["province"]);
+    $adviser_id = null;
+    if (isset($_SESSION['user_id'])) {
+        $adviser_id = $_SESSION['user_id'];
+    }
 
     if (!$student_id) {
         $_SESSION["error"] = "Error: Student ID is missing.";
@@ -32,6 +35,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
+    if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
+        $fileTmpPath = $_FILES['profile_image']['tmp_name'];
+        $fileName = $_FILES['profile_image']['name'];
+        $fileNameCmps = explode('.', $fileName);
+        $fileExtension = strtolower(end($fileNameCmps));
+        $allowedfileExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        
+        if (in_array($fileExtension, $allowedfileExtensions)) {
+            $uploadFileDir = '../img/student_1x1/';
+            if (!is_dir($uploadFileDir)) {
+                mkdir($uploadFileDir, 0777, true);
+            }
+            
+            $clean_student_no = str_replace('-', '', $student_no);
+            $newFileName = $adviser_id . '_' . $clean_student_no . '.' . $fileExtension;
+            $dest_path = $uploadFileDir . $newFileName;
+            
+            $extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            foreach ($extensions as $ext) {
+                $oldFile = $uploadFileDir . $adviser_id . '_' . $clean_student_no . '.' . $ext;
+                if (file_exists($oldFile)) {
+                    unlink($oldFile);
+                }
+            }
+            
+            move_uploaded_file($fileTmpPath, $dest_path);
+        }
+    }
 
     $query = "UPDATE students SET 
                 student_no = '$student_no', 
@@ -49,8 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 address = '$address', 
                 city = '$city', 
                 province = '$province'
-            WHERE id = '$student_id'";
-
+                WHERE id = '$student_id'";
 
     if (mysqli_query($conn, $query)) {
         $_SESSION["success"] = "Student record updated successfully.";
