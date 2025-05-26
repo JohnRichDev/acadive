@@ -1,4 +1,5 @@
 <?php
+// acadive/sections/students.php
 ?>
 <style>
     .stud-avatar img {
@@ -69,12 +70,12 @@
         </div>
     </div>
     <h2>List of Students (A.Y <?php
-    $displayAcademic = isset($_GET['academic_year']) && !empty($_GET['academic_year']) ? $_GET['academic_year'] : '2024-2025';
-    $displaySemester = isset($_GET['semester']) && !empty($_GET['semester']) ?
-        ($semesters[$_GET['semester']] ?? '2nd Semester')
-        : '2nd Semester';
-    echo $displayAcademic . ' ' . $displaySemester;
-    ?>)</h2>
+                                $displayAcademic = isset($_GET['academic_year']) && !empty($_GET['academic_year']) ? $_GET['academic_year'] : '2024-2025';
+                                $displaySemester = isset($_GET['semester']) && !empty($_GET['semester']) ?
+                                    ($semesters[$_GET['semester']] ?? '2nd Semester')
+                                    : '2nd Semester';
+                                echo $displayAcademic . ' ' . $displaySemester;
+                                ?>)</h2>
     <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <div style="display: flex; align-items: center;"> <span style="margin-right: 10px;">Sort by:</span>
@@ -125,108 +126,109 @@
                 </thead>
                 <tbody>
                     <?php
-                    include("database/connection.php");
+                    include("database/connection.php"); //
 
-                    $query = "SELECT * FROM students WHERE 1=1";
-                    $params = [];
+                    $query = "SELECT * FROM students WHERE 1=1"; //
+                    $params = []; //
 
                     if (isset($_GET['search']) && !empty($_GET['search'])) {
                         $search = '%' . $_GET['search'] . '%';
-                        $query .= " AND (student_no LIKE ? OR last_name LIKE ? OR first_name LIKE ? OR mi LIKE ?)";
-                        $params[] = $search;
-                        $params[] = $search;
-                        $params[] = $search;
-                        $params[] = $search;
+                        $query .= " AND (student_no LIKE ? OR last_name LIKE ? OR first_name LIKE ? OR mi LIKE ?)"; //
+                        $params[] = $search; //
+                        $params[] = $search; //
+                        $params[] = $search; //
+                        $params[] = $search; //
                     }
                     if (isset($_GET['academic_year']) && !empty($_GET['academic_year'])) {
-                        $query .= " AND academic = ?";
-                        $params[] = $_GET['academic_year'];
+                        $query .= " AND academic = ?"; //
+                        $params[] = $_GET['academic_year']; //
                     }
 
                     if (isset($_GET['semester']) && !empty($_GET['semester'])) {
-                        $query .= " AND semester = ?";
-                        $params[] = $_GET['semester'];
+                        $query .= " AND semester = ?"; //
+                        $params[] = $_GET['semester']; //
                     }
 
-                    $sort = isset($_GET['sort']) ? $_GET['sort'] : 'year_asc';
-                    switch ($sort) {
-                        case 'name_asc':
-                            $query .= " ORDER BY last_name ASC, first_name ASC";
-                            break;
-                        case 'name_desc':
-                            $query .= " ORDER BY last_name DESC, first_name DESC";
-                            break;
-                        case 'year_asc':
-                            $query .= " ORDER BY year_level ASC";
-                            break;
-                        case 'year_desc':
-                            $query .= " ORDER BY year_level DESC";
-                            break;
-                        case 'section_asc':
-                            $query .= " ORDER BY section ASC";
-                            break;
-                        case 'section_desc':
-                            $query .= " ORDER BY section DESC";
-                            break;
-                        default:
-                            $query .= " ORDER BY last_name ASC, first_name ASC";
+                    $sort = isset($_GET['sort']) ? $_GET['sort'] : 'year_asc'; //
+                    switch ($sort) { //
+                        case 'name_asc': //
+                            $query .= " ORDER BY last_name ASC, first_name ASC"; //
+                            break; //
+                        case 'name_desc': //
+                            $query .= " ORDER BY last_name DESC, first_name DESC"; //
+                            break; //
+                        case 'year_asc': //
+                            $query .= " ORDER BY year_level ASC"; //
+                            break; //
+                        case 'year_desc': //
+                            $query .= " ORDER BY year_level DESC"; //
+                            break; //
+                        case 'section_asc': //
+                            $query .= " ORDER BY section ASC"; //
+                            break; //
+                        case 'section_desc': //
+                            $query .= " ORDER BY section DESC"; //
+                            break; //
+                        default: //
+                            $query .= " ORDER BY last_name ASC, first_name ASC"; //
                     }
 
-                    $stmt = mysqli_prepare($conn, $query);
-                    if (!empty($params)) {
-                        $types = str_repeat('s', count($params));
-                        mysqli_stmt_bind_param($stmt, $types, ...$params);
+                    $stmt = mysqli_prepare($conn, $query); //
+                    if (!empty($params)) { //
+                        $types = str_repeat('s', count($params)); //
+                        mysqli_stmt_bind_param($stmt, $types, ...$params); //
                     }
-                    mysqli_stmt_execute($stmt);
-                    $result = mysqli_stmt_get_result($stmt);
+                    mysqli_stmt_execute($stmt); //
+                    $result = mysqli_stmt_get_result($stmt); //
 
-                    if (mysqli_num_rows($result) > 0) {
-                        $counter = 1;
-                        while ($row = mysqli_fetch_assoc($result)) {
-                            echo "<tr>";
-                            echo "<td>" . $counter . "</td>";
-                            
-                            $adviser_id = $_SESSION['user_id'];
-                            $student_no = $row['student_no'];
-                            $student_no = str_replace('-', '', $student_no);
-                            $imgDir = 'img/student_1x1/';
-                            $imgBase = $adviser_id . '_' . $student_no;
-                            $imgSrc = '';
-                            $found = false;
-                            $extensions = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
-                            foreach ($extensions as $ext) {
-                                $tryPath = $imgDir . $imgBase . '.' . $ext;
-                                if (file_exists($tryPath)) {
-                                    $imgSrc = $tryPath;
-                                    $found = true;
-                                    break;
+                    if (mysqli_num_rows($result) > 0) { //
+                        $counter = 1; //
+                        while ($row = mysqli_fetch_assoc($result)) { //
+                            echo "<tr>"; //
+                            echo "<td>" . $counter . "</td>"; //
+
+                            $adviser_id = $_SESSION['user_id']; //
+                            $student_no = $row['student_no']; //
+                            $student_no = str_replace('-', '', $student_no); //
+                            $imgDir = 'img/student_1x1/'; //
+                            $imgBase = $adviser_id . '_' . $student_no; //
+                            $imgSrc = ''; //
+                            $found = false; //
+                            $extensions = ['png', 'jpg', 'jpeg', 'webp', 'gif']; //
+                            foreach ($extensions as $ext) { //
+                                $tryPath = $imgDir . $imgBase . '.' . $ext; //
+                                if (file_exists($tryPath)) { //
+                                    $imgSrc = $tryPath; //
+                                    $found = true; //
+                                    break; //
                                 }
                             }
-                            if (!$found) {
-                                $imgSrc = 'img/person.png';
+                            if (!$found) { //
+                                $imgSrc = 'img/person.png'; //
                             }
-                            echo "<td>\n    <div class='stud-avatar'>\n        <img src='" . $imgSrc . "' alt='Student Photo'>\n    </div>\n</td>";
-                            echo "<td>" . htmlspecialchars($row['student_no']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['last_name']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['first_name']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['mi']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['year_level']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['section']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['address'] . ", " . $row['city'] . ", " . $row['province']) . "</td>";
+                            echo "<td>\n    <div class='stud-avatar'>\n        <img src='" . $imgSrc . "' alt='Student Photo'>\n    </div>\n</td>"; //
+                            echo "<td>" . htmlspecialchars($row['student_no']) . "</td>"; //
+                            echo "<td>" . htmlspecialchars($row['last_name']) . "</td>"; //
+                            echo "<td>" . htmlspecialchars($row['first_name']) . "</td>"; //
+                            echo "<td>" . htmlspecialchars($row['mi']) . "</td>"; //
+                            echo "<td>" . htmlspecialchars($row['year_level']) . "</td>"; //
+                            echo "<td>" . htmlspecialchars($row['section']) . "</td>"; //
+                            echo "<td>" . htmlspecialchars($row['address'] . ", " . $row['city'] . ", " . $row['province']) . "</td>"; //
+                            // **MODIFIED LINE BELOW**
                             echo "<td>
-                                    <button class='action-btn'>
+                                    <a href='index.php?section=students&showModal=editStudent&student_id=" . $row['id'] . "' class='action-btn'>
                                         <i class='fas fa-edit'></i>
-                                    </button>
+                                    </a>
                                 </td>";
-                            echo "</tr>";
-                            $counter++;
+                            echo "</tr>"; //
+                            $counter++; //
                         }
                     } else {
                         echo "<tr><td colspan='10' style='text-align: center; padding: 20px;'>
                                 <i class='fas fa-info-circle' style='margin-right: 10px; color: #666;'></i>No results were found
-                              </td></tr>";
+                              </td></tr>"; //
                     }
-                    mysqli_stmt_close($stmt);
+                    mysqli_stmt_close($stmt); //
                     ?>
                 </tbody>
             </table>

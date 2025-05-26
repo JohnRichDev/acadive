@@ -1,6 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-
 <?php
 session_start();
 if (!isset($_SESSION["username"])) {
@@ -8,7 +5,33 @@ if (!isset($_SESSION["username"])) {
     exit;
 }
 $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
+
+$studentToEdit = null;
+if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($_GET['student_id'])) {
+    include './database/connection.php';
+    $student_id_raw = $_GET['student_id'];
+    if (filter_var($student_id_raw, FILTER_VALIDATE_INT) === false) {
+
+        $_SESSION["error"] = "Invalid student ID format.";
+        header("Location: index.php?section=students");
+        exit;
+    }
+    $student_id = mysqli_real_escape_string($conn, $student_id_raw);
+
+    $query = "SELECT * FROM students WHERE id = '$student_id'";
+    $result = mysqli_query($conn, $query);
+    if ($result && mysqli_num_rows($result) > 0) {
+        $studentToEdit = mysqli_fetch_assoc($result);
+    } else {
+        $_SESSION["error"] = "Student record not found (ID: " . htmlspecialchars($student_id_raw) . ").";
+        header("Location: index.php?section=students");
+        exit;
+    }
+}
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -94,6 +117,12 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
         #sidebar button:hover {
             background-color: #1c3d7a;
         }
+
+        #sidebar a button.active-section {
+            background-color: #1c3d7a;
+            font-weight: bold;
+        }
+
 
         #content {
             padding: 20px;
@@ -350,6 +379,8 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
             transition: all 0.2s;
             padding: 0;
             font-size: large;
+            text-decoration: none;
+            /* Added for <a> tag styling */
         }
 
         .action-btn i {
@@ -384,6 +415,8 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
             max-width: 800px;
             max-height: 80vh;
             overflow-y: auto;
+            position: relative;
+
         }
 
         .modal-header {
@@ -391,6 +424,12 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-header h2 {
+            margin: 0;
         }
 
         .close {
@@ -398,6 +437,10 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
+            text-decoration: none;
+            position: absolute;
+            top: 15px;
+            right: 25px;
         }
 
         .close:hover {
@@ -449,6 +492,7 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
             cursor: pointer;
             font-size: 14px;
             margin-left: 10px;
+            text-decoration: none;
         }
 
         .btn-primary {
@@ -465,7 +509,6 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
             padding: 10px;
             border-radius: 4px;
             margin-bottom: 15px;
-            display: none;
         }
 
         .alert-success {
@@ -492,19 +535,19 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
         <div style="margin-top: 20px;">
             <a href="?section=dashboard" style="text-decoration:none;">
                 <button type="button" style="width:100%;text-align:left;"
-                    class="<?php echo ($currentSection === 'dashboard') ? 'active' : ''; ?>">
+                    class="<?php echo ($currentSection === 'dashboard') ? 'active-section' : ''; ?>">
                     <i class="fas fa-tachometer-alt"></i> Dashboard
                 </button>
             </a>
             <a href="?section=students" style="text-decoration:none;">
                 <button type="button" style="width:100%;text-align:left;"
-                    class="<?php echo ($currentSection === 'students') ? 'active' : ''; ?>">
+                    class="<?php echo ($currentSection === 'students') ? 'active-section' : ''; ?>">
                     <i class="fas fa-users"></i> Student
                 </button>
             </a>
             <a href="?section=account" style="text-decoration:none;">
                 <button type="button" style="width:100%;text-align:left;"
-                    class="<?php echo ($currentSection === 'account') ? 'active' : ''; ?>">
+                    class="<?php echo ($currentSection === 'account') ? 'active-section' : ''; ?>">
                     <i class="fas fa-cogs"></i> Account
                 </button>
             </a>
@@ -522,9 +565,10 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
                 <span style="font-size: x-large;">Welcome, <b>
                         <?php
                         if (isset($_SESSION["username"])) {
-                            echo $_SESSION["username"];
+                            echo htmlspecialchars($_SESSION["username"]);
                         } else {
                             header("Location: login.php");
+                            exit;
                         }
                         ?></b>!</span>
             </div>
@@ -532,21 +576,25 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
                 <div style="text-align: right;">
                     <span style="font-size: large;"><b>
                             <?php
-                            $username = $_SESSION["username"];
-                            echo strtoupper($username);
+                            echo strtoupper(htmlspecialchars($_SESSION["username"]));
                             ?>
                         </b></span><br>
                     Administrator
                 </div>
                 <div class="avatar">
-                    <img src="img/person.png" style="height: 30px; width: auto;" alt="Student Photo">
+                    <img src="img/person.png" style="height: 30px; width: auto;" alt="User Avatar">
                 </div>
             </div>
         </div>
 
         <div class="section active">
             <?php
-            include './sections/' . $currentSection . '.php';
+            $allowed_sections = ['dashboard', 'students', 'account'];
+            if (in_array($currentSection, $allowed_sections) && file_exists('./sections/' . $currentSection . '.php')) {
+                include './sections/' . $currentSection . '.php';
+            } else {
+                include './sections/dashboard.php';
+            }
             ?>
         </div>
     </div>
@@ -556,9 +604,21 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Add New Student Record</h2>
+                <a href="?section=<?php echo htmlspecialchars($currentSection); ?>" class="close" title="Close">&times;</a>
             </div>
-            <div id="alertMessage" class="alert"></div>
-            <form id="addStudentForm" action="process/add_student.php" method="POST">
+            <div id="alertMessage" class="alert" style="<?php echo (isset($_SESSION['modal_error']) || isset($_SESSION['modal_success'])) ? 'display:block;' : 'display:none;'; ?>">
+                <?php
+                if (isset($_SESSION['modal_error'])) {
+                    echo '<div class="alert alert-error">' . htmlspecialchars($_SESSION['modal_error']) . '</div>';
+                    unset($_SESSION['modal_error']);
+                }
+                if (isset($_SESSION['modal_success'])) {
+                    echo '<div class="alert alert-success">' . htmlspecialchars($_SESSION['modal_success']) . '</div>';
+                    unset($_SESSION['modal_success']);
+                }
+                ?>
+            </div>
+            <form id="addStudentForm" action="process/add_student.php" method="POST" enctype="multipart/form-data">
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="student_no">Student Number</label>
@@ -581,7 +641,7 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
                     </div>
                     <div class="form-group">
                         <label for="mi">Middle Initial</label>
-                        <input type="text" id="mi" name="mi" maxlength="1">
+                        <input type="text" id="mi" name="mi" maxlength="5">
                     </div>
                     <div class="form-group">
                         <label for="gender">Gender</label>
@@ -602,12 +662,11 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
                             <option value="2">2nd Year</option>
                             <option value="3">3rd Year</option>
                             <option value="4">4th Year</option>
-                            <option value="5">5rd Year</option>
+                            <option value="5">5th Year</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="section">Section</label>
-                        <select id="section" name="section" required>
+                        <label for="section_form">Section</label> <select id="section_form" name="section" required>
                             <option value="A">A</option>
                             <option value="B">B</option>
                             <option value="C">C</option>
@@ -617,19 +676,19 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="academic">Academic Year</label>
-                        <select name="academic_year" id="academic" required>
-                            <option value="2024-2025">2024-2025</option>
-                            <option value="2023-2024">2023-2024</option>
-                            <option value="2022-2023">2022-2023</option>
-                            <option value="2021-2022">2021-2022</option>
-                            <option value="2020-2021">2020-2021</option>
-                            <option value="2019-2020">2019-2020</option>
+                        <label for="academic_year_form">Academic Year</label> <select name="academic_year" id="academic_year_form" required>
+                            <?php
+                            $startYear = date("Y") + 1;
+                            for ($i = 0; $i < 6; $i++) {
+                                $endY = $startYear - $i;
+                                $acadY = ($endY - 1) . "-" . $endY;
+                                echo "<option value=\"$acadY\">$acadY</option>";
+                            }
+                            ?>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="semester">Semester</label>
-                        <select id="semester" name="semester" required>
+                        <label for="semester_form">Semester</label> <select id="semester_form" name="semester" required>
                             <option value="1st">1st Semester</option>
                             <option value="2nd">2nd Semester</option>
                             <option value="Mid-Year">Mid-Year</option>
@@ -645,12 +704,12 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="address">Address</label>
+                    <label for="address">Address (Street, Barangay)</label>
                     <input type="text" id="address" name="address" required>
                 </div>
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="city">City</label>
+                        <label for="city">City / Municipality</label>
                         <input type="text" id="city" name="city" required>
                     </div>
                     <div class="form-group">
@@ -658,8 +717,12 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
                         <input type="text" id="province" name="province" required>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label for="profile_image">Profile Image (Optional)</label>
+                    <input type="file" id="profile_image" name="profile_image" accept="image/png, image/jpeg, image/gif, image/webp">
+                </div>
                 <div class="form-buttons" style="text-align: center;">
-                    <a href="?section=<?php echo $currentSection; ?>" class="btn btn-secondary"
+                    <a href="?section=<?php echo htmlspecialchars($currentSection); ?>" class="btn btn-secondary"
                         style="text-decoration:none;">Cancel</a>
                     <input type="submit" class="btn btn-primary" value="Save Student">
                 </div>
@@ -667,6 +730,173 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
         </div>
     </div>
 
+    <div id="editStudentModal" class="modal"
+        style="<?php echo (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && $studentToEdit) ? 'display:block;' : 'display:none;'; ?>">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Student Record</h2>
+                <a href="?section=students" class="close" title="Close">&times;</a>
+            </div>
+            <div id="editAlertMessage" class="alert" style="<?php echo (isset($_SESSION['edit_modal_error']) || isset($_SESSION['edit_modal_success'])) ? 'display:block;' : 'display:none;'; ?>">
+                <?php
+                if (isset($_SESSION['edit_modal_error'])) {
+                    echo '<div class="alert alert-error">' . htmlspecialchars($_SESSION['edit_modal_error']) . '</div>';
+                    unset($_SESSION['edit_modal_error']);
+                }
+                if (isset($_SESSION['edit_modal_success'])) {
+                    echo '<div class="alert alert-success">' . htmlspecialchars($_SESSION['edit_modal_success']) . '</div>';
+                    unset($_SESSION['edit_modal_success']);
+                }
+                ?>
+            </div>
+            <?php if ($studentToEdit): ?>
+                <form id="editStudentForm" action="process/edit_student.php" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="student_id" value="<?php echo htmlspecialchars($studentToEdit['id']); ?>">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="edit_student_no">Student Number</label>
+                            <input type="text" id="edit_student_no" name="student_no" value="<?php echo htmlspecialchars($studentToEdit['student_no']); ?>" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_academic_status">Academic Status</label>
+                            <select id="edit_academic_status" name="academic_status" required>
+                                <option value="Regular" <?php echo ($studentToEdit['academic_status'] === 'Regular') ? 'selected' : ''; ?>>Regular</option>
+                                <option value="Irregular" <?php echo ($studentToEdit['academic_status'] === 'Irregular') ? 'selected' : ''; ?>>Irregular</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_last_name">Last Name</label>
+                            <input type="text" id="edit_last_name" name="last_name" value="<?php echo htmlspecialchars($studentToEdit['last_name']); ?>" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_first_name">First Name</label>
+                            <input type="text" id="edit_first_name" name="first_name" value="<?php echo htmlspecialchars($studentToEdit['first_name']); ?>" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_mi">Middle Initial</label>
+                            <input type="text" id="edit_mi" name="mi" maxlength="5" value="<?php echo htmlspecialchars($studentToEdit['mi']); ?>">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_gender">Gender</label>
+                            <select id="edit_gender" name="gender" required>
+                                <option value="Male" <?php echo ($studentToEdit['gender'] === 'Male') ? 'selected' : ''; ?>>Male</option>
+                                <option value="Female" <?php echo ($studentToEdit['gender'] === 'Female') ? 'selected' : ''; ?>>Female</option>
+                                <option value="Other" <?php echo ($studentToEdit['gender'] === 'Other') ? 'selected' : ''; ?>>Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_birthday">Birthday</label>
+                            <input type="date" id="edit_birthday" name="birthday" value="<?php echo htmlspecialchars($studentToEdit['birthday']); ?>" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_year_level">Year Level</label>
+                            <select id="edit_year_level" name="year_level" required>
+                                <?php for ($i = 1; $i <= 5; $i++): ?>
+                                    <option value="<?php echo $i; ?>" <?php echo ($studentToEdit['year_level'] == $i) ? 'selected' : ''; ?>><?php echo $i;
+                                                                                                                                            echo ($i == 1) ? 'st' : (($i == 2) ? 'nd' : (($i == 3) ? 'rd' : 'th')); ?> Year</option>
+                                <?php endfor; ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_section_form">Section</label> <select id="edit_section_form" name="section" required>
+                                <?php $sections = ['A', 'B', 'C', 'D', 'E', 'F']; ?>
+                                <?php foreach ($sections as $sec): ?>
+                                    <option value="<?php echo $sec; ?>" <?php echo ($studentToEdit['section'] === $sec) ? 'selected' : ''; ?>><?php echo $sec; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_academic_year_form">Academic Year</label> <select name="academic_year" id="edit_academic_year_form" required>
+                                <?php
+                                $startYear = date("Y") + 1; // e.g., 2025
+                                for ($k = 0; $k < 6; $k++) {
+                                    $endY_edit = $startYear - $k;
+                                    $acadY_edit = ($endY_edit - 1) . "-" . $endY_edit;
+                                    $selected_edit = ($studentToEdit['academic'] === $acadY_edit) ? 'selected' : '';
+                                    echo "<option value=\"$acadY_edit\" $selected_edit>$acadY_edit</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_semester_form">Semester</label> <select id="edit_semester_form" name="semester" required>
+                                <option value="1st" <?php echo ($studentToEdit['semester'] === '1st') ? 'selected' : ''; ?>>1st Semester</option>
+                                <option value="2nd" <?php echo ($studentToEdit['semester'] === '2nd') ? 'selected' : ''; ?>>2nd Semester</option>
+                                <option value="Mid-Year" <?php echo ($studentToEdit['semester'] === 'Mid-Year') ? 'selected' : ''; ?>>Mid-Year</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_student_classification">Student Classification</label>
+                            <select id="edit_student_classification" name="student_classification" required>
+                                <option value="New" <?php echo ($studentToEdit['student_classification'] === 'New') ? 'selected' : ''; ?>>New Student</option>
+                                <option value="Regular" <?php echo ($studentToEdit['student_classification'] === 'Regular') ? 'selected' : ''; ?>>Regular Student</option>
+                                <option value="Transferee" <?php echo ($studentToEdit['student_classification'] === 'Transferee') ? 'selected' : ''; ?>>Transferee</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_address">Address (Street, Barangay)</label>
+                        <input type="text" id="edit_address" name="address" value="<?php echo htmlspecialchars($studentToEdit['address']); ?>" required>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="edit_city">City / Municipality</label>
+                            <input type="text" id="edit_city" name="city" value="<?php echo htmlspecialchars($studentToEdit['city']); ?>" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_province">Province</label>
+                            <input type="text" id="edit_province" name="province" value="<?php echo htmlspecialchars($studentToEdit['province']); ?>" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_profile_image">New Profile Image (Optional - leave blank to keep current)</label>
+                        <input type="file" id="edit_profile_image" name="profile_image" accept="image/png, image/jpeg, image/gif, image/webp">
+                        <?php
+                        if (!empty($studentToEdit['profile_image']) && file_exists($studentToEdit['profile_image'])) {
+                            echo '<p style="margin-top: 5px;">Current image: <img src="' . htmlspecialchars($studentToEdit['profile_image']) . '" alt="Current Profile Image" style="max-width: 100px; max-height: 100px; vertical-align: middle; margin-left: 10px;"></p>';
+                        } else if (!empty($studentToEdit['profile_image'])) {
+                            echo '<p style="margin-top: 5px; color: #777;">Current image path (not found): ' . htmlspecialchars($studentToEdit['profile_image']) . '</p>';
+                        }
+                        ?>
+                    </div>
+                    <div class="form-buttons" style="text-align: center;">
+                        <a href="?section=students" class="btn btn-secondary" style="text-decoration:none;">Cancel</a>
+                        <input type="submit" class="btn btn-primary" value="Update Student">
+                    </div>
+                </form>
+            <?php else: ?>
+                <p>Student data could not be loaded for editing. Please ensure the student ID is correct and try again.</p>
+                <div class="form-buttons" style="text-align: center;">
+                    <a href="?section=students" class="btn btn-secondary" style="text-decoration:none;">Back to List</a>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addStudentModal = document.getElementById('addStudentModal');
+            const editStudentModal = document.getElementById('editStudentModal');
+
+            function closeModalAndResetURL(modalElement) {
+                if (modalElement && modalElement.style.display === 'block') {
+                    const currentUrl = new URL(window.location.href);
+                    currentUrl.searchParams.delete('showModal');
+                    currentUrl.searchParams.delete('student_id');
+                    window.history.replaceState({}, '', currentUrl.toString());
+                    modalElement.style.display = 'none';
+                }
+            }
+
+            window.addEventListener('click', function(event) {
+                if (event.target === addStudentModal) {
+                    closeModalAndResetURL(addStudentModal);
+                }
+                if (event.target === editStudentModal) {
+                    closeModalAndResetURL(editStudentModal);
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
