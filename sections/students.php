@@ -185,12 +185,27 @@
                         while ($row = mysqli_fetch_assoc($result)) {
                             echo "<tr>";
                             echo "<td>" . $counter . "</td>";
-                            $imgSrc = !empty($row['profile_image']) ? $row['profile_image'] : 'img/person.png';
-                            echo "<td>
-                                    <div class='stud-avatar'>
-                                        <img src='" . $imgSrc . "' alt='Student Photo'>
-                                    </div>
-                                </td>";
+                            
+                            $adviser_id = $_SESSION['user_id'];
+                            $student_no = $row['student_no'];
+                            $student_no = str_replace('-', '', $student_no);
+                            $imgDir = 'img/student_1x1/';
+                            $imgBase = $adviser_id . '_' . $student_no;
+                            $imgSrc = '';
+                            $found = false;
+                            $extensions = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
+                            foreach ($extensions as $ext) {
+                                $tryPath = $imgDir . $imgBase . '.' . $ext;
+                                if (file_exists($tryPath)) {
+                                    $imgSrc = $tryPath;
+                                    $found = true;
+                                    break;
+                                }
+                            }
+                            if (!$found) {
+                                $imgSrc = 'img/person.png';
+                            }
+                            echo "<td>\n    <div class='stud-avatar'>\n        <img src='" . $imgSrc . "' alt='Student Photo'>\n    </div>\n</td>";
                             echo "<td>" . htmlspecialchars($row['student_no']) . "</td>";
                             echo "<td>" . htmlspecialchars($row['last_name']) . "</td>";
                             echo "<td>" . htmlspecialchars($row['first_name']) . "</td>";

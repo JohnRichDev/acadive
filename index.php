@@ -567,8 +567,8 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
                     <div class="form-group">
                         <label for="academic_status">Academic Status</label>
                         <select id="academic_status" name="academic_status" required>
-                            <option value="Officially enrolled">Officially enrolled</option>
-                            <option value="Dropped">Dropped</option>
+                            <option value="Regular">Regular</option>
+                            <option value="Irregular">Irregular</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -603,7 +603,6 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
                             <option value="3">3rd Year</option>
                             <option value="4">4th Year</option>
                             <option value="5">5rd Year</option>
-                            <option value="6">6th Year</option>
                         </select>
                     </div>
                     <div class="form-group">
