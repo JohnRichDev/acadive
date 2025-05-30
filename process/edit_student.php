@@ -35,6 +35,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
+    $old_student_no = "";
+    $checkQuery = "SELECT student_no FROM students WHERE id = '$student_id'";
+    $result = mysqli_query($conn, $checkQuery);
+    if ($result && mysqli_num_rows($result) > 0) {
+        $student_data = mysqli_fetch_assoc($result);
+        $old_student_no = str_replace('-', '', $student_data['student_no']);
+    }    if ($student_no != $old_student_no) {
+        $duplicateQuery = "SELECT id FROM students WHERE student_no = '$student_no' AND id != '$student_id'";
+        $duplicateResult = mysqli_query($conn, $duplicateQuery);
+        if ($duplicateResult && mysqli_num_rows($duplicateResult) > 0) {
+            $_SESSION["error"] = "Error: Student number already exists for another student.";
+            header("Location: ../index.php?section=students");
+            exit();
+        }
+    }
+
     if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
         $fileTmpPath = $_FILES['profile_image']['tmp_name'];
         $fileName = $_FILES['profile_image']['name'];
@@ -53,6 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $dest_path = $uploadFileDir . $newFileName;
             
             $extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            
             foreach ($extensions as $ext) {
                 $oldFile = $uploadFileDir . $adviser_id . '_' . $clean_student_no . '.' . $ext;
                 if (file_exists($oldFile)) {
@@ -64,7 +81,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    $query = "UPDATE students SET 
+    if ($old_student_no !== "" && $old_student_no !== str_replace('-', '', $student_no)) {
+        $uploadFileDir = '../img/student_1x1/';
+        $clean_student_no = str_replace('-', '', $student_no);
+        $extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        
+        foreach ($extensions as $ext) {
+            $oldImagePath = $uploadFileDir . $adviser_id . '_' . $old_student_no . '.' . $ext;
+            if (file_exists($oldImagePath)) {
+                $newImagePath = $uploadFileDir . $adviser_id . '_' . $clean_student_no . '.' . $ext;
+                rename($oldImagePath, $newImagePath);
+                break;
+            }
+        }
+    }
+
+    $query = "UPDATE students SET
                 student_no = '$student_no', 
                 academic_status = '$academic_status', 
                 last_name = '$last_name', 
@@ -80,14 +112,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 address = '$address', 
                 city = '$city', 
                 province = '$province'
-                WHERE id = '$student_id'";
-
-    if (mysqli_query($conn, $query)) {
+                WHERE id = '$student_id'";    if (mysqli_query($conn, $query)) {
         $_SESSION["success"] = "Student record updated successfully.";
         header("Location: ../index.php?section=students");
     } else {
         $_SESSION["error"] = "Error updating student record: " . mysqli_error($conn);
-        header("Location: ../index.php?section=students&showModal=editStudent&student_id=" . $student_id);
+        header("Location: ../index.php?section=students");
     }
     exit();
 } else {
