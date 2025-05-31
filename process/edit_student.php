@@ -24,9 +24,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $address = mysqli_real_escape_string($conn, $_POST["address"]);
     $city = mysqli_real_escape_string($conn, $_POST["city"]);
     $province = mysqli_real_escape_string($conn, $_POST["province"]);
-    $adviser_id = null;
+    $advisor_id = null;
     if (isset($_SESSION['user_id'])) {
-        $adviser_id = $_SESSION['user_id'];
+        $advisor_id = $_SESSION['user_id'];
     }
 
     if (!$student_id) {
@@ -65,13 +65,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
             
             $clean_student_no = str_replace('-', '', $student_no);
-            $newFileName = $adviser_id . '_' . $clean_student_no . '.' . $fileExtension;
+            $newFileName = $advisor_id . '_' . $clean_student_no . '.' . $fileExtension;
             $dest_path = $uploadFileDir . $newFileName;
             
             $extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
             
             foreach ($extensions as $ext) {
-                $oldFile = $uploadFileDir . $adviser_id . '_' . $clean_student_no . '.' . $ext;
+                $oldFile = $uploadFileDir . $advisor_id . '_' . $clean_student_no . '.' . $ext;
                 if (file_exists($oldFile)) {
                     unlink($oldFile);
                 }
@@ -87,22 +87,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
         
         foreach ($extensions as $ext) {
-            $oldImagePath = $uploadFileDir . $adviser_id . '_' . $old_student_no . '.' . $ext;
+            $oldImagePath = $uploadFileDir . $advisor_id . '_' . $old_student_no . '.' . $ext;
             if (file_exists($oldImagePath)) {
-                $newImagePath = $uploadFileDir . $adviser_id . '_' . $clean_student_no . '.' . $ext;
+                $newImagePath = $uploadFileDir . $advisor_id . '_' . $clean_student_no . '.' . $ext;
                 rename($oldImagePath, $newImagePath);
                 break;
             }
         }
-    }
-
-    $query = "UPDATE students SET
+    }    $query = "UPDATE students SET
                 student_no = '$student_no', 
                 academic_status = '$academic_status', 
                 last_name = '$last_name', 
                 first_name = '$first_name', 
                 mi = '$mi',
-                gender = '$gender', 
+                sex = '$gender', 
                 birthday = '$birthday', 
                 year_level = '$year_level', 
                 section = '$section_code', 
@@ -112,7 +110,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 address = '$address', 
                 city = '$city', 
                 province = '$province'
-                WHERE id = '$student_id'";    if (mysqli_query($conn, $query)) {
+                WHERE id = '$student_id'";if (mysqli_query($conn, $query)) {
         $_SESSION["success"] = "Student record updated successfully.";
         header("Location: ../index.php?section=students");
     } else {

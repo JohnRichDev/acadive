@@ -380,7 +380,6 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
             padding: 0;
             font-size: large;
             text-decoration: none;
-            /* Added for <a> tag styling */
         }
 
         .action-btn i {
@@ -493,9 +492,7 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
             font-size: 14px;
             margin-left: 10px;
             text-decoration: none;
-        }
-
-        .btn-primary {
+        }        .btn-primary {
             background-color: #1c3d7a;
             color: white;
         }
@@ -503,6 +500,17 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
         .btn-secondary {
             background-color: #6c757d;
             color: white;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+            border: 1px solid #dc3545;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
         }
 
         .alert {
@@ -606,9 +614,7 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
         .dashboard-graphs-container::-webkit-scrollbar-thumb:hover,
         .students-table-container::-webkit-scrollbar-thumb:hover {
             background: #a8a8a8;
-        }
-
-        .card.dashboard-main {
+        }        .card.dashboard-main {
             max-height: calc(100vh - 250px);
             overflow: hidden;
             display: flex;
@@ -623,6 +629,148 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
             overflow-y: auto;
             padding-right: 10px;
             min-height: 300px;
+        }
+
+        .confirmation-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(3px);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .confirmation-modal-content {
+            background-color: #ffffff;
+            margin: 15% auto;
+            padding: 0;
+            border: none;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 480px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease-out;
+            overflow: hidden;
+        }
+
+        .confirmation-modal-header {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 20px 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .confirmation-modal-header .icon {
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .confirmation-modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .confirmation-modal-body {
+            padding: 25px;
+            text-align: left;
+        }
+
+        .confirmation-modal-body .warning-text {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .confirmation-modal-body .consequences {
+            background-color: #f8f9fa;
+            border-left: 4px solid #dc3545;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .confirmation-modal-body .consequences h4 {
+            margin: 0 0 10px 0;
+            color: #dc3545;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .confirmation-modal-body .consequences ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #666;
+        }
+
+        .confirmation-modal-body .consequences li {
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .confirmation-modal-footer {
+            padding: 20px 25px;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .confirmation-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 80px;
+        }
+
+        .confirmation-btn-cancel {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .confirmation-btn-cancel:hover {
+            background-color: #5a6268;
+            transform: translateY(-1px);
+        }
+
+        .confirmation-btn-confirm {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .confirmation-btn-confirm:hover {
+            background-color: #c82333;
+            transform: translateY(-1px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(-20px) scale(0.9);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
     </style>
     </style>
@@ -747,7 +895,7 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
                         <input type="text" id="mi" name="mi" maxlength="5">
                     </div>
                     <div class="form-group">
-                        <label for="gender">Gender</label>
+                        <label for="gender">Sex</label>
                         <select id="gender" name="gender" required>
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
@@ -880,10 +1028,9 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
                         </div>
                         <div class="form-group">
                             <label for="edit_gender">Gender</label>
-                            <select id="edit_gender" name="gender" required>
-                                <option value="Male" <?php echo ($studentToEdit['gender'] === 'Male') ? 'selected' : ''; ?>>Male</option>
-                                <option value="Female" <?php echo ($studentToEdit['gender'] === 'Female') ? 'selected' : ''; ?>>Female</option>
-                                <option value="Other" <?php echo ($studentToEdit['gender'] === 'Other') ? 'selected' : ''; ?>>Other</option>
+                            <select id="edit_gender" name="gender" required>                                <option value="Male" <?php echo ($studentToEdit['sex'] === 'Male') ? 'selected' : ''; ?>>Male</option>
+                                <option value="Female" <?php echo ($studentToEdit['sex'] === 'Female') ? 'selected' : ''; ?>>Female</option>
+                                <option value="Other" <?php echo ($studentToEdit['sex'] === 'Other') ? 'selected' : ''; ?>>Other</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -910,7 +1057,7 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
                         <div class="form-group">
                             <label for="edit_academic_year_form">Academic Year</label> <select name="academic_year" id="edit_academic_year_form" required>
                                 <?php
-                                $startYear = date("Y") + 1; // e.g., 2025
+                                $startYear = date("Y") + 1;
                                 for ($k = 0; $k < 6; $k++) {
                                     $endY_edit = $startYear - $k;
                                     $acadY_edit = ($endY_edit - 1) . "-" . $endY_edit;
@@ -959,11 +1106,12 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
                         } else if (!empty($studentToEdit['profile_image'])) {
                             echo '<p style="margin-top: 5px; color: #777;">Current image path (not found): ' . htmlspecialchars($studentToEdit['profile_image']) . '</p>';
                         }
-                        ?>
-                    </div>
-                    <div class="form-buttons" style="text-align: center;">
+                        ?>                    </div>                    <div class="form-buttons" style="text-align: center; display: flex; gap: 10px; justify-content: center;">
                         <a href="?section=students" class="btn btn-secondary" style="text-decoration:none;">Cancel</a>
                         <input type="submit" class="btn btn-primary" value="Update Student">
+                        <button type="button" class="btn btn-danger" onclick="confirmDeleteStudent(<?php echo htmlspecialchars($studentToEdit['id']); ?>)" style="background-color: #dc3545; color: white; border: 1px solid #dc3545; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='#c82333'" onmouseout="this.style.backgroundColor='#dc3545'">
+                            <i class="fas fa-trash-alt" style="margin-right: 5px;"></i>Delete Student
+                        </button>
                     </div>
                 </form>
             <?php else: ?>
@@ -971,13 +1119,74 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
                 <div class="form-buttons" style="text-align: center;">
                     <a href="?section=students" class="btn btn-secondary" style="text-decoration:none;">Back to List</a>
                 </div>
-            <?php endif; ?>
+            <?php endif; ?>        </div>
+    </div>    
+    
+    <!-- Custom Confirmation Modal -->
+    <div id="customConfirmModal" class="confirmation-modal">
+        <div class="confirmation-modal-content">
+            <div class="confirmation-modal-header">
+                <i class="fas fa-exclamation-triangle icon"></i>
+                <h3>Confirm Deletion</h3>
+            </div>
+            <div class="confirmation-modal-body">
+                <p class="warning-text">Are you sure you want to permanently delete this student record?</p>
+                <div class="consequences">
+                    <h4>This action will:</h4>
+                    <ul>
+                        <li>Remove all student information from the database</li>
+                        <li>Delete the student's profile image</li>
+                        <li>Cannot be undone</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="confirmation-modal-footer">
+                <button class="confirmation-btn confirmation-btn-cancel" onclick="hideCustomConfirm()">Cancel</button>
+                <button class="confirmation-btn confirmation-btn-confirm" onclick="confirmAction()">Delete Student</button>
+            </div>
         </div>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
+
+    <script>        let pendingStudentId = null;
+
+        function showCustomConfirm(studentId) {
+            pendingStudentId = studentId;
+            document.getElementById('customConfirmModal').style.display = 'block';
+        }
+
+        function hideCustomConfirm() {
+            document.getElementById('customConfirmModal').style.display = 'none';
+            pendingStudentId = null;
+        }
+
+        function confirmAction() {
+            if (pendingStudentId) {
+                deleteStudent(pendingStudentId);
+                hideCustomConfirm();
+            }
+        }
+
+        function deleteStudent(studentId) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = 'process/delete_student.php';
+            
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'student_id';
+            input.value = studentId;
+            
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        function confirmDeleteStudent(studentId) {
+            showCustomConfirm(studentId);
+        }        document.addEventListener('DOMContentLoaded', function() {
             const addStudentModal = document.getElementById('addStudentModal');
             const editStudentModal = document.getElementById('editStudentModal');
+            const customConfirmModal = document.getElementById('customConfirmModal');
 
             function closeModalAndResetURL(modalElement) {
                 if (modalElement && modalElement.style.display === 'block') {
@@ -995,6 +1204,19 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
                 }
                 if (event.target === editStudentModal) {
                     closeModalAndResetURL(editStudentModal);
+                }
+                if (event.target === customConfirmModal) {
+                    hideCustomConfirm();
+                }
+            });
+
+            document.addEventListener('keydown', function(event) {
+                if (customConfirmModal.style.display === 'block') {
+                    if (event.key === 'Escape') {
+                        hideCustomConfirm();
+                    } else if (event.key === 'Enter') {
+                        confirmAction();
+                    }
                 }
             });
         });

@@ -73,14 +73,14 @@
     </div>
 
     <h2>List of Students (A.Y <?php
-                                $displayAcademic = isset($_GET['academic_year']) && !empty($_GET['academic_year']) ? $_GET['academic_year'] : '2024-2025';
-                                $displaySemester = isset($_GET['semester']) && !empty($_GET['semester']) ?
-                                    ($semesters[$_GET['semester']] ?? '2nd Semester')
-                                    : '2nd Semester';
-                                echo $displayAcademic . ' ' . $displaySemester;
-                                ?>)</h2>
+    $displayAcademic = isset($_GET['academic_year']) && !empty($_GET['academic_year']) ? $_GET['academic_year'] : '2024-2025';
+    $displaySemester = isset($_GET['semester']) && !empty($_GET['semester']) ?
+        ($semesters[$_GET['semester']] ?? '2nd Semester')
+        : '2nd Semester';
+    echo $displayAcademic . ' ' . $displaySemester;
+    ?>)</h2>
 
-    <div class="card" style="height: 50%">
+    <div class="card" style="height: calc(100vh - 300px); display: flex; flex-direction: column;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <div style="display: flex; align-items: center;">
                 <span style="margin-right: 10px;">Sort by:</span>
@@ -113,7 +113,7 @@
             </a>
         </div>
 
-        <div class="students-table-container" style="height: 75%">
+        <div class="students-table-container" style="flex: 1; overflow: auto;">
             <table class="student-table">
                 <thead>
                     <tr>
@@ -131,8 +131,8 @@
                 </thead>
                 <tbody>
                     <?php
-                    include("database/connection.php"); //
-
+                    include("database/connection.php");
+                    
                     $limit = isset($_GET['limit']) && is_numeric($_GET['limit']) ? (int) $_GET['limit'] : 10;
                     $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
                     $offset = ($page - 1) * $limit;
@@ -238,32 +238,32 @@
                                     break;
                                 }
                             }
-                            if (!$found) { //
-                                $imgSrc = 'img/person.png'; //
+                            if (!$found) {
+                                $imgSrc = 'img/person.png';
                             }
-                            echo "<td>\n    <div class='stud-avatar'>\n        <img src='" . $imgSrc . "' alt='Student Photo'>\n    </div>\n</td>"; //
-                            echo "<td>" . htmlspecialchars($row['student_no']) . "</td>"; //
-                            echo "<td>" . htmlspecialchars($row['last_name']) . "</td>"; //
-                            echo "<td>" . htmlspecialchars($row['first_name']) . "</td>"; //
-                            echo "<td>" . htmlspecialchars($row['mi']) . "</td>"; //
-                            echo "<td>" . htmlspecialchars($row['year_level']) . "</td>"; //
-                            echo "<td>" . htmlspecialchars($row['section']) . "</td>"; //
-                            echo "<td>" . htmlspecialchars($row['address'] . ", " . $row['city'] . ", " . $row['province']) . "</td>"; //
-                            // **MODIFIED LINE BELOW**
+                            echo "<td>\n    <div class='stud-avatar'>\n        <img src='" . $imgSrc . "' alt='Student Photo'>\n    </div>\n</td>";
+                            echo "<td>" . htmlspecialchars($row['student_no']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['last_name']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['first_name']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['mi']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['year_level']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['section']) . "</td>";
+                            echo "<td>" . htmlspecialchars($row['address'] . ", " . $row['city'] . ", " . $row['province']) . "</td>";
+                            
                             echo "<td>
                                     <a href='index.php?section=students&showModal=editStudent&student_id=" . $row['id'] . "' class='action-btn'>
                                         <i class='fas fa-edit'></i>
                                     </a>
                                 </td>";
-                            echo "</tr>"; //
-                            $counter++; //
+                            echo "</tr>";
+                            $counter++;
                         }
                     } else {
                         echo "<tr><td colspan='10' style='text-align: center; padding: 20px;'>
                                 <i class='fas fa-info-circle' style='margin-right: 10px; color: #666;'></i>No results were found
-                              </td></tr>"; //
+                              </td></tr>";
                     }
-                    mysqli_stmt_close($stmt); //
+                    mysqli_stmt_close($stmt);
                     ?>
                 </tbody>
             </table>
@@ -293,10 +293,10 @@
                 <div style="display: flex; gap: 5px;">
                     <?php if ($page > 1): ?>
                         <a href="?<?php
-                                    $prevParams = $_GET;
-                                    $prevParams['page'] = $page - 1;
-                                    echo http_build_query($prevParams);
-                                    ?>"
+                        $prevParams = $_GET;
+                        $prevParams['page'] = $page - 1;
+                        echo http_build_query($prevParams);
+                        ?>"
                             style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; text-decoration: none; color: #333;">
                             Previous
                         </a>
@@ -325,14 +325,14 @@
                             </span>
                         <?php else: ?>
                             <a href="?<?php
-                                        $pageParams = $_GET;
-                                        $pageParams['page'] = $i;
-                                        echo http_build_query($pageParams);
-                                        ?>"
+                            $pageParams = $_GET;
+                            $pageParams['page'] = $i;
+                            echo http_build_query($pageParams);
+                            ?>"
                                 style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; text-decoration: none; color: #333;">
                                 <?php echo $i; ?>
                             </a>
-                    <?php endif;
+                        <?php endif;
                     endfor;
 
                     if ($endPage < $totalPages) {
@@ -345,10 +345,10 @@
 
                     <?php if ($page < $totalPages): ?>
                         <a href="?<?php
-                                    $nextParams = $_GET;
-                                    $nextParams['page'] = $page + 1;
-                                    echo http_build_query($nextParams);
-                                    ?>"
+                        $nextParams = $_GET;
+                        $nextParams['page'] = $page + 1;
+                        echo http_build_query($nextParams);
+                        ?>"
                             style="padding: 6px 12px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; text-decoration: none; color: #333;">
                             Next
                         </a>

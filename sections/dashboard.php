@@ -50,6 +50,26 @@ foreach ($ageGroups as $group) {
     }
 }
 
+$genderLabels = [];
+$genderCounts = [];
+$queryGender = "SELECT sex, COUNT(*) as total FROM students $whereClause AND sex IS NOT NULL AND sex != '' GROUP BY sex ORDER BY total DESC";
+
+$stmt = mysqli_prepare($conn, $queryGender);
+if ($stmt) {
+    if (!empty($params)) {
+        $types = str_repeat('s', count($params));
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+    }
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    while ($row = mysqli_fetch_assoc($result)) {
+        $genderLabels[] = $row['sex'];
+        $genderCounts[] = (int) $row['total'];
+    }
+    mysqli_stmt_close($stmt);
+}
+
 $years = [1, 2, 3, 4, 5];
 $yearLabels = ['1st', '2nd', '3rd', '4th', '5th'];
 $regularCounts = [];
@@ -212,6 +232,34 @@ if ($stmt) {
 $yearTotalLabels = array_keys($yearSectionTotals);
 $yearTotalCounts = array_values($yearSectionTotals);
 
+$genderSectionData = [];
+$queryGenderSection = "SELECT CONCAT(year_level, '-', section) as year_section, sex, COUNT(*) as total 
+                      FROM students $whereClause AND section IS NOT NULL AND section != '' AND sex IS NOT NULL AND sex != ''
+                      GROUP BY year_level, section, sex 
+                      ORDER BY year_level, section, sex";
+
+$stmt = mysqli_prepare($conn, $queryGenderSection);
+if ($stmt) {
+    if (!empty($params)) {
+        $types = str_repeat('s', count($params));
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+    }
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    while ($row = mysqli_fetch_assoc($result)) {
+        $section = $row['year_section'];
+        $gender = $row['sex'];
+        $count = (int) $row['total'];
+
+        if (!isset($genderSectionData[$section])) {
+            $genderSectionData[$section] = [];
+        }
+        $genderSectionData[$section][$gender] = $count;
+    }
+    mysqli_stmt_close($stmt);
+}
+
 ?>
 <style>
     .chart-flex-container {
@@ -322,6 +370,9 @@ $yearTotalCounts = array_values($yearSectionTotals);
         overflow: hidden;
         transition: all 0.3s ease;
         width: 100%;
+        height: 500px;
+        display: flex;
+        flex-direction: column;
     }
 
     .chart-card:hover {
@@ -333,6 +384,7 @@ $yearTotalCounts = array_values($yearSectionTotals);
         padding: 15px 20px;
         border-bottom: 1px solid #f0f0f0;
         background-color: #fcfcfc;
+        flex-shrink: 0;
     }
 
     .chart-header h4 {
@@ -343,21 +395,29 @@ $yearTotalCounts = array_values($yearSectionTotals);
         display: flex;
         align-items: center;
         justify-content: space-between;
+        line-height: 1.4;
     }
 
     .chart-header h4 i {
         margin-right: 8px;
         color: #1a73e8;
+        font-size: 1rem;
     }
 
     .chart-body {
         padding: 15px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
     }
 
     .chart-container {
         position: relative;
-        height: 250px;
+        height: 300px;
         width: 100%;
+        flex: 1;
+        min-height: 250px;
     }
 
     .chart-stats {
@@ -365,6 +425,9 @@ $yearTotalCounts = array_values($yearSectionTotals);
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
+        flex-shrink: 0;
+        max-height: 100px;
+        overflow-y: auto;
     }
 
     .stat-badge {
@@ -389,6 +452,8 @@ $yearTotalCounts = array_values($yearSectionTotals);
         display: flex;
         flex-direction: column;
         gap: 15px;
+        flex: 1;
+        overflow-y: auto;
     }
 
     .status-bar {
@@ -479,48 +544,53 @@ $yearTotalCounts = array_values($yearSectionTotals);
 
     .address-chart-container {
         display: flex;
-        gap: 15px;
-    }
-
-    .address-list-container {
-        flex: 1;
-    }    .address-list {
-        display: flex;
         flex-direction: column;
-        gap: 8px;
-        font-size: 0.9rem;
-        max-height: 200px;
+        gap: 20px;
+        height: 100%;
+        flex: 1;
+    }
+
+    .address-table-container {
+        width: 100%;
+        border: 1px solid #f0f0f0;
+        border-radius: 8px;
+        overflow: hidden;
+        flex: 1;
+        max-height: 220px;
         overflow-y: auto;
-        scrollbar-width: thin;
-        scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
-        padding-right: 4px;
-    }
-    
-    .address-list::-webkit-scrollbar {
-        width: 6px;
-    }
-    
-    .address-list::-webkit-scrollbar-track {
-        background: transparent;
-    }
-    
-    .address-list::-webkit-scrollbar-thumb {
-        background-color: rgba(0, 0, 0, 0.2);
-        border-radius: 3px;
     }
 
-    .address-item {
-        display: flex;
-        align-items: center;
-        padding: 8px 10px;
-        background: #f8f9fa;
-        border-radius: 6px;
-        transition: all 0.2s ease;
+    .address-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
     }
 
-    .address-item:hover {
-        background: #f0f4f8;
-        transform: translateX(3px);
+    .address-table th,
+    .address-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .address-table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        color: #0a1f44;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .address-table tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .address-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .address-table td:last-child,
+    .address-table th:last-child {
+        text-align: right;
     }
 
     .address-color-indicator {
@@ -528,26 +598,23 @@ $yearTotalCounts = array_values($yearSectionTotals);
         height: 12px;
         border-radius: 50%;
         margin-right: 8px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        flex-shrink: 0;
+        display: inline-block;
     }
 
-    .address-label {
-        flex: 1;
-        font-weight: 600;
-    }
-
-    .address-count {
-        color: #555;
-    }
-
-    .address-percent {
-        font-size: 0.8rem;
-        color: #777;
+    .address-label-cell {
+        display: flex;
+        align-items: center;
+        font-weight: 500;
     }
 
     .pie-chart-container {
-        width: 180px;
-        height: 180px;
+        width: 220px;
+        height: 220px;
         position: relative;
+        margin: 0 auto;
+        flex-shrink: 0;
     }
 
     .toggle-btn {
@@ -556,21 +623,24 @@ $yearTotalCounts = array_values($yearSectionTotals);
         color: #1a73e8;
         padding: 6px 12px;
         border-radius: 50px;
-        font-size: 0.8rem;
+        font-size: 0.85rem;
+        font-weight: 500;
         cursor: pointer;
         display: inline-flex;
         align-items: center;
         gap: 6px;
         transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .toggle-btn:hover {
         background: #e8f0fe;
         color: #1967d2;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
     }
 
     .toggle-btn i {
-        font-size: 0.7rem;
+        font-size: 0.75rem;
     }
 
     .toggle-active {
@@ -580,31 +650,42 @@ $yearTotalCounts = array_values($yearSectionTotals);
 
     .section-view-container {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         gap: 20px;
+        align-items: stretch;
+        height: 100%;
+        flex: 1;
     }
 
     .section-chart-container {
-        flex: 1;
-        min-width: 45%;
-    }    .section-table-container {
-        flex: 1;
-        min-width: 45%;
-        max-height: 250px;
+        width: 100%;
+        position: relative;
+        height: 220px;
+        order: 2;
+        flex-shrink: 0;
+    }
+
+    .section-table-container {
+        width: 100%;
+        max-height: 200px;
         overflow-y: auto;
         margin-top: 0;
         scrollbar-width: thin;
         scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+        border: 1px solid #f0f0f0;
+        border-radius: 8px;
+        order: 1;
+        flex: 1;
     }
-    
+
     .section-table-container::-webkit-scrollbar {
         width: 6px;
     }
-    
+
     .section-table-container::-webkit-scrollbar-track {
         background: transparent;
     }
-    
+
     .section-table-container::-webkit-scrollbar-thumb {
         background-color: rgba(0, 0, 0, 0.2);
         border-radius: 3px;
@@ -621,7 +702,9 @@ $yearTotalCounts = array_values($yearSectionTotals);
         padding: 8px 12px;
         text-align: left;
         border-bottom: 1px solid #f0f0f0;
-    }    .section-table th {
+    }
+
+    .section-table th {
         background-color: #f8f9fa;
         font-weight: 600;
         color: #0a1f44;
@@ -633,19 +716,147 @@ $yearTotalCounts = array_values($yearSectionTotals);
 
     .section-table tr:hover {
         background-color: #f8f9fa;
+        cursor: pointer;
+    }
+
+    .section-table tr.highlighted-section {
+        background-color: #e8f0fe;
+        animation: highlight-pulse 1.5s ease-in-out;
+    }
+
+    @keyframes highlight-pulse {
+        0% {
+            background-color: #e8f0fe;
+        }
+
+        50% {
+            background-color: #c7dbfc;
+        }
+
+        100% {
+            background-color: #e8f0fe;
+        }
     }
 
     .section-table td:last-child,
     .section-table th:last-child {
         text-align: right;
-    }    .section-year-group {
+    }
+
+    .section-year-group {
         background-color: #f0f4f9;
         font-weight: 600;
         position: relative;
     }
-    
+
     .section-year-group td {
         padding: 10px 12px;
+    }
+
+    .gender-view-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        align-items: stretch;
+        height: 100%;
+        flex: 1;
+    }
+
+    .gender-chart-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        flex-shrink: 0;
+    }
+
+    .gender-legend {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        font-size: 0.9rem;
+    }
+
+    .gender-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+    }
+
+    .gender-legend-color {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .gender-table-container {
+        width: 100%;
+        max-height: 200px;
+        overflow-y: auto;
+        margin-top: 0;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+        border: 1px solid #f0f0f0;
+        border-radius: 8px;
+        flex: 1;
+    }
+
+    .gender-table-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .gender-table-container::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .gender-table-container::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+    }
+
+    .gender-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+    }
+
+    .gender-table th,
+    .gender-table td {
+        padding: 8px 10px;
+        text-align: left;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .gender-table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        color: #0a1f44;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        box-shadow: 0 1px 0 #f0f0f0;
+        font-size: 0.8rem;
+    }
+
+    .gender-table tr:hover {
+        background-color: #f8f9fa;
+        cursor: pointer;
+    }
+
+    .gender-table td:nth-child(2),
+    .gender-table td:nth-child(3),
+    .gender-table td:nth-child(4),
+    .gender-table td:nth-child(5),
+    .gender-table td:nth-child(6),
+    .gender-table th:nth-child(2),
+    .gender-table th:nth-child(3),
+    .gender-table th:nth-child(4),
+    .gender-table th:nth-child(5),
+    .gender-table th:nth-child(6) {
+        text-align: center;
     }
 </style>
 <div class="filters-bar">
@@ -710,7 +921,7 @@ $yearTotalCounts = array_values($yearSectionTotals);
             <h3><i class="fas fa-male"></i> Total Male</h3>
             <div class="count">
                 <?php
-                $query = "SELECT COUNT(*) as total FROM students $whereClause AND gender = ?";
+                $query = "SELECT COUNT(*) as total FROM students $whereClause AND sex = ?";
                 $queryParams = array_merge($params, ['Male']);
                 $stmt = mysqli_prepare($conn, $query);
                 if ($stmt) {
@@ -730,7 +941,7 @@ $yearTotalCounts = array_values($yearSectionTotals);
             <h3><i class="fas fa-female"></i> Total Female</h3>
             <div class="count">
                 <?php
-                $query = "SELECT COUNT(*) as total FROM students $whereClause AND gender = ?";
+                $query = "SELECT COUNT(*) as total FROM students $whereClause AND sex = ?";
                 $queryParams = array_merge($params, ['Female']);
                 $stmt = mysqli_prepare($conn, $query);
                 if ($stmt) {
@@ -762,6 +973,39 @@ $yearTotalCounts = array_values($yearSectionTotals);
                     </div>
                 </div>
             </div>
+            <div class="chart-col">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-venus-mars"></i> Gender Distribution</h4>
+                    </div>
+                    <div class="chart-body">
+                        <div class="gender-view-container">
+                            <div class="gender-chart-container">
+                                <div class="pie-chart-container">
+                                    <canvas id="genderPieChart"></canvas>
+                                </div>
+                                <div id="genderLegend" class="gender-legend"></div>
+                            </div>
+                            <div class="gender-table-container">
+                                <table class="gender-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Section</th>
+                                            <th>Male</th>
+                                            <th>Female</th>
+                                            <th>Total</th>
+                                            <th>M%</th>
+                                            <th>F%</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="genderTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="chart-col">
                 <div class="chart-card">
@@ -773,12 +1017,14 @@ $yearTotalCounts = array_values($yearSectionTotals);
                     </div>
                 </div>
             </div>
+        </div>
 
+        <div class="chart-row">
             <div class="chart-col">
                 <div class="chart-card">
                     <div class="chart-header">
                         <h4>
-                            <i class="fas fa-map-marker-alt"></i> Student Address
+                            <div><i class="fas fa-map-marker-alt"></i> Student Address</div>
                             <button id="toggleAddressType" class="toggle-btn">
                                 <span id="toggleBtnText">By Province</span>
                                 <i class="fas fa-exchange-alt"></i>
@@ -786,8 +1032,18 @@ $yearTotalCounts = array_values($yearSectionTotals);
                         </h4>
                     </div>
                     <div class="chart-body address-chart-container">
-                        <div class="address-list-container">
-                            <div id="addressList" class="address-list"></div>
+                        <div class="address-table-container">
+                            <table class="address-table" id="addressTable">
+                                <thead>
+                                    <tr>
+                                        <th id="addressTypeHeader">City</th>
+                                        <th>Students</th>
+                                        <th>Percentage</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="addressTableBody">
+                                </tbody>
+                            </table>
                         </div>
                         <div class="pie-chart-container">
                             <canvas id="addressPieChart"></canvas>
@@ -795,9 +1051,7 @@ $yearTotalCounts = array_values($yearSectionTotals);
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="chart-row">
             <div class="chart-col">
                 <div class="chart-card">
                     <div class="chart-header">
@@ -811,7 +1065,6 @@ $yearTotalCounts = array_values($yearSectionTotals);
                     </div>
                 </div>
             </div>
-
             <div class="chart-col">
                 <div class="chart-card">
                     <div class="chart-header">
@@ -822,7 +1075,7 @@ $yearTotalCounts = array_values($yearSectionTotals);
                     <div class="chart-body">
                         <div class="section-view-container">
                             <div class="section-chart-container">
-                                <canvas id="sectionBarChart"></canvas>
+                                <canvas id="sectionDonutChart"></canvas>
                             </div>
                             <div class="section-table-container">
                                 <table class="section-table">
@@ -845,10 +1098,13 @@ $yearTotalCounts = array_values($yearSectionTotals);
     </div>
 </div>
 
-<script>
-    const ageData = {
+<script>    const ageData = {
         labels: <?php echo json_encode($ageLabels); ?>,
         counts: <?php echo json_encode($ageCounts); ?>
+    };
+    const genderData = {
+        labels: <?php echo json_encode($genderLabels); ?>,
+        counts: <?php echo json_encode($genderCounts); ?>
     };
     const statusData = {
         regular: <?php echo json_encode($regularCounts); ?>,
@@ -862,16 +1118,17 @@ $yearTotalCounts = array_values($yearSectionTotals);
     const sectionData = {
         labels: <?php echo json_encode($sectionLabels); ?>,
         counts: <?php echo json_encode($sectionCounts); ?>
-    };
-    const yearTotalData = {
+    }; const yearTotalData = {
         labels: <?php echo json_encode($yearTotalLabels); ?>,
         counts: <?php echo json_encode($yearTotalCounts); ?>
-    };
+    }; const genderSectionData = <?php echo json_encode($genderSectionData); ?>;
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 <script>
+    Chart.register(ChartDataLabels);
+
     Chart.defaults.font.family = "'Arial', sans-serif";
     Chart.defaults.color = '#555';
     Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(10, 31, 68, 0.8)';
@@ -956,9 +1213,7 @@ $yearTotalCounts = array_values($yearSectionTotals);
                 }
             }
         }
-    });
-
-    const totalAge = ageData.counts.reduce((a, b) => a + b, 0);
+    }); const totalAge = ageData.counts.reduce((a, b) => a + b, 0);
     if (totalAge > 0) {
         document.getElementById('agePercentages').innerHTML = ageData.labels.map((label, i) => {
             const percent = ((ageData.counts[i] / totalAge) * 100).toFixed(1);
@@ -968,7 +1223,126 @@ $yearTotalCounts = array_values($yearSectionTotals);
                 <span class="stat-value">${percent}%</span>
             </div>`;
         }).join('');
+    } const genderPieChart = new Chart(document.getElementById('genderPieChart'), {
+        type: 'doughnut',
+        data: {
+            labels: genderData.labels,
+            datasets: [{
+                data: genderData.counts,
+                backgroundColor: function (context) {
+                    const label = context.chart.data.labels[context.dataIndex];
+                    if (label === 'Male') return '#4e73df';
+                    if (label === 'Female') return '#e74a3b';
+                    return '#1cc88a';
+                },
+                borderColor: '#fff',
+                borderWidth: 2,
+                hoverBorderWidth: 0,
+                hoverOffset: 10,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '60%',
+            layout: {
+                padding: {
+                    top: 10,
+                    bottom: 10,
+                    left: 10,
+                    right: 10
+                }
+            },
+            animation: {
+                animateRotate: true,
+                animateScale: true,
+                duration: 800,
+                easing: 'easeOutCirc'
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? (value / total * 100).toFixed(1) + '%' : '0%';
+                            return `${label}: ${value} (${percentage})`;
+                        }
+                    }
+                },
+                datalabels: {
+                    formatter: (value, ctx) => {
+                        const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = total > 0 ? (value / total * 100).toFixed(1) + '%' : '0%';
+                        const label = ctx.chart.data.labels[ctx.dataIndex];
+                        return `${label}\n${percentage}`;
+                    },
+                    color: '#fff',
+                    font: {
+                        weight: 'bold',
+                        size: 12
+                    },
+                    textAlign: 'center',
+                    textStrokeColor: '#000000',
+                    textStrokeWidth: 2,
+                    textShadowBlur: 4,
+                    textShadowColor: 'rgba(0, 0, 0, 0.7)'
+                }
+            }
+        }
+    });
+
+    function createGenderLegend() {
+        const legendContainer = document.getElementById('genderLegend');
+        legendContainer.innerHTML = '';
+
+        const totalGender = genderData.counts.reduce((a, b) => a + b, 0);
+
+        genderData.labels.forEach((label, i) => {
+            const count = genderData.counts[i];
+            const percent = totalGender > 0 ? ((count / totalGender) * 100).toFixed(1) : 0;
+            let color = '#1cc88a';
+            if (label === 'Male') color = '#4e73df';
+            if (label === 'Female') color = '#e74a3b';
+
+            const legendItem = document.createElement('div');
+            legendItem.className = 'gender-legend-item';
+            legendItem.innerHTML = `
+                <div class="gender-legend-color" style="background-color: ${color}"></div>
+                <span>${label}: ${count} (${percent}%)</span>
+            `;
+            legendContainer.appendChild(legendItem);
+        });
     }
+
+    function updateGenderTable() {
+        const tableBody = document.getElementById('genderTableBody');
+        tableBody.innerHTML = '';
+
+        Object.keys(genderSectionData).forEach(section => {
+            const maleCount = genderSectionData[section]['Male'] || 0;
+            const femaleCount = genderSectionData[section]['Female'] || 0;
+            const totalCount = maleCount + femaleCount;
+            const malePercent = totalCount > 0 ? ((maleCount / totalCount) * 100).toFixed(1) : '0';
+            const femalePercent = totalCount > 0 ? ((femaleCount / totalCount) * 100).toFixed(1) : '0';
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${section}</td>
+                <td>${maleCount}</td>
+                <td>${femaleCount}</td>
+                <td>${totalCount}</td>
+                <td>${malePercent}%</td>
+                <td>${femalePercent}%</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    createGenderLegend();
+    updateGenderTable();
 
     function createStatusBars() {
         const container = document.getElementById('statusBarsContainer');
@@ -1010,6 +1384,7 @@ $yearTotalCounts = array_values($yearSectionTotals);
     createStatusBars();
 
     let showCity = true;
+
     const addressPieChart = new Chart(document.getElementById('addressPieChart'), {
         type: 'doughnut',
         data: {
@@ -1022,11 +1397,10 @@ $yearTotalCounts = array_values($yearSectionTotals);
                 hoverBorderWidth: 0,
                 hoverOffset: 10
             }]
-        },
-        options: {
+        }, options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: '60%',
+            cutout: '50%',
             animation: {
                 animateRotate: true,
                 animateScale: true,
@@ -1045,28 +1419,67 @@ $yearTotalCounts = array_values($yearSectionTotals);
                             return `${label}: ${value} (${percentage})`;
                         }
                     }
+                }, datalabels: {
+                    formatter: (value, ctx) => {
+                        const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = total > 0 ? (value / total * 100).toFixed(1) + '%' : '0%';
+                        const label = ctx.chart.data.labels[ctx.dataIndex];
+
+                        if (value / total > 0.08) {
+                            return label.length > 8 ? label.substring(0, 8) + '...\n' + percentage : label + '\n' + percentage;
+                        } else {
+                            return percentage;
+                        }
+                    },
+                    color: '#ffffff',
+                    font: {
+                        weight: 'bold',
+                        size: 10
+                    },
+                    textAlign: 'center',
+                    textStrokeColor: '#000000',
+                    textStrokeWidth: 2,
+                    textShadowBlur: 4,
+                    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+                    anchor: 'center',
+                    align: 'center',
+                    offset: 0,
+                    display: function (ctx) {
+                        const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = ctx.dataset.data[ctx.dataIndex] / total;
+                        return percentage > 0.05;
+                    }
                 }
             }
         }
-    });
-
-    function updateAddressList() {
+    }); function updateAddressList() {
         const data = showCity ? addressData.city : addressData.province;
         const total = data.counts.reduce((a, b) => a + b, 0);
+        const tableBody = document.getElementById('addressTableBody');
+        const header = document.getElementById('addressTypeHeader');
 
-        const listHtml = data.labels.map((label, i) => {
+        header.textContent = showCity ? 'City' : 'Province';
+
+        tableBody.innerHTML = '';
+
+        data.labels.forEach((label, i) => {
             const count = data.counts[i];
             const percent = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
             const color = colorPalette.accent[i % colorPalette.accent.length];
 
-            return `<div class="address-item">
-                <div class="address-color-indicator" style="background-color: ${color}"></div>
-                <div class="address-label">${label}</div>
-                <div class="address-count">${count} <span class="address-percent">(${percent}%)</span></div>
-            </div>`;
-        }).join('');
-
-        document.getElementById('addressList').innerHTML = listHtml;
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>
+                    <div class="address-label-cell">
+                        <div class="address-color-indicator" style="background-color: ${color}"></div>
+                        ${label}
+                    </div>
+                </td>
+                <td>${count}</td>
+                <td>${percent}%</td>
+            `;
+            tableBody.appendChild(row);
+        });
     }
 
     function updateAddressChart() {
@@ -1165,13 +1578,11 @@ $yearTotalCounts = array_values($yearSectionTotals);
             </div>`;
         }).join('');
     }
-
-    const sectionBarChart = new Chart(document.getElementById('sectionBarChart'), {
-        type: 'bar',
+    const sectionDonutChart = new Chart(document.getElementById('sectionDonutChart'), {
+        type: 'doughnut',
         data: {
             labels: sectionData.labels,
             datasets: [{
-                label: 'Students',
                 data: sectionData.counts,
                 backgroundColor: function (context) {
                     const index = context.dataIndex;
@@ -1181,67 +1592,112 @@ $yearTotalCounts = array_values($yearSectionTotals);
                     const year = parseInt(label.split('-')[0]);
                     return colorPalette.yearColors[(year - 1) % colorPalette.yearColors.length];
                 },
-                borderColor: colorPalette.border,
-                borderWidth: 1,
-                borderRadius: 4,
-                barPercentage: 0.8,
-                categoryPercentage: 0.8
+                borderColor: '#fff',
+                borderWidth: 2,
+                hoverBorderWidth: 0,
+                hoverOffset: 12
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            cutout: '50%',
+            layout: {
+                padding: {
+                    top: 15,
+                    bottom: 15,
+                    left: 20,
+                    right: 20
+                }
+            },
             animation: {
-                duration: 1000,
-                easing: 'easeOutQuart'
+                animateRotate: true,
+                animateScale: true,
+                duration: 800,
+                easing: 'easeOutCirc'
             },
             plugins: {
-                legend: { display: false },
+                legend: {
+                    display: false
+                },
                 tooltip: {
                     callbacks: {
                         label: function (context) {
-                            const label = context.dataset.label || '';
-                            const value = context.parsed.y || 0;
+                            const label = context.label || '';
+                            const value = context.raw || 0;
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
                             const percentage = total > 0 ? (value / total * 100).toFixed(1) + '%' : '0%';
                             return `${label}: ${value} (${percentage})`;
                         }
                     }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)',
-                        drawBorder: false
-                    },
-                    ticks: {
-                        font: {
-                            size: 11
-                        },
-                        padding: 10
-                    }
                 },
-                x: {
-                    grid: {
-                        display: false,
-                        drawBorder: false
+                datalabels: {
+                    formatter: (value, ctx) => {
+                        const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = total > 0 ? (value / total * 100).toFixed(1) + '%' : '0%';
+                        const label = ctx.chart.data.labels[ctx.dataIndex];
+
+                        const parts = label.split('-');
+                        const year = parts[0];
+                        const section = parts.length > 1 ? parts[1] : '';
+
+                        if (label === 'Others') {
+                            return 'Others\n' + percentage;
+                        } else {
+                            return `${year}-${section}\n${percentage}`;
+                        }
                     },
-                    ticks: {
-                        font: {
-                            size: 10
-                        },
-                        padding: 5,
-                        maxRotation: 45,
-                        minRotation: 45
+                    color: '#333',
+                    font: {
+                        weight: 'bold',
+                        size: 11
+                    },
+                    textAlign: 'center',
+                    textStrokeColor: '#fff',
+                    textStrokeWidth: 2,
+                    textShadowBlur: 6,
+                    textShadowColor: 'rgba(255, 255, 255, 0.75)',
+                    borderRadius: 4,
+                    borderWidth: 1,
+                    padding: 4,
+                    anchor: function (context) {
+                        const value = context.dataset.data[context.dataIndex];
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percent = value / total;
+
+                        return percent < 0.03 ? 'center' : 'end';
+                    },
+                    align: function (context) {
+                        const index = context.dataIndex;
+                        const count = context.dataset.data.length;
+                        const value = context.dataset.data[context.dataIndex];
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percent = value / total;
+
+                        if (percent < 0.03) return 'end';
+
+                        return 'center';
+                    },
+                    offset: function (context) {
+                        const value = context.dataset.data[context.dataIndex];
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percent = value / total;
+
+                        return percent < 0.05 ? 15 : 8;
+                    },
+                    display: function (ctx) {
+                        return ctx.dataset.data[ctx.dataIndex] / ctx.dataset.data.reduce((a, b) => a + b, 0) > 0.02;
+                    },
+                    listeners: {
+                        click: function (context) {
+                            const label = context.chart.data.labels[context.dataIndex];
+                            highlightSectionInTable(label);
+                        }
                     }
                 }
             }
         }
-    });
-
-    window.addEventListener('load', function () {
+    }); window.addEventListener('load', function () {
         createSectionTable();
     });
 
@@ -1283,13 +1739,152 @@ $yearTotalCounts = array_values($yearSectionTotals);
 
             yearGroups[yearKey].forEach(item => {
                 const sectionRow = document.createElement('tr');
+                sectionRow.dataset.section = item.label;
+                let color = '#999';
+                if (item.label !== 'Others') {
+                    const year = parseInt(item.label.split('-')[0]);
+                    color = colorPalette.yearColors[(year - 1) % colorPalette.yearColors.length];
+                }
+
                 sectionRow.innerHTML = `
-                    <td>${item.label}</td>
+                    <td>
+                        <div style="display: flex; align-items: center;">
+                            <div style="width: 10px; height: 10px; border-radius: 50%; background-color: ${color}; margin-right: 8px;"></div>
+                            ${item.label}
+                        </div>
+                    </td>
                     <td>${item.count}</td>
                     <td>${((item.count / total) * 100).toFixed(1)}%</td>
                 `;
+
+                sectionRow.addEventListener('click', function () {
+                    highlightSectionInChart(item.label);
+                });
+
                 tableBody.appendChild(sectionRow);
             });
         });
     }
+
+    function highlightSectionInTable(sectionLabel) {
+        const rows = document.querySelectorAll('#sectionTableBody tr');
+        rows.forEach(row => {
+            row.classList.remove('highlighted-section');
+        });
+
+        const targetRow = document.querySelector(`#sectionTableBody tr[data-section="${sectionLabel}"]`);
+        if (targetRow) {
+            targetRow.classList.add('highlighted-section');
+
+            targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    function highlightSectionInChart(sectionLabel) {
+        const chart = sectionDonutChart;
+        const activeElements = chart.getActiveElements();
+
+        if (activeElements.length > 0) {
+            chart.setActiveElements([]);
+        }
+
+        const index = chart.data.labels.indexOf(sectionLabel);
+        if (index !== -1) {
+            chart.setActiveElements([{
+                datasetIndex: 0,
+                index: index
+            }]);
+
+            chart.update();
+        }
+    }
+
+    const genderSectionChart = new Chart(document.getElementById('genderSectionChart'), {
+        type: 'bar',
+        data: {
+            labels: Object.keys(genderSectionData),
+            datasets: [
+                {
+                    label: 'Male Students',
+                    data: Object.keys(genderSectionData).map(section => genderSectionData[section]['Male'] || 0),
+                    backgroundColor: '#4e73df',
+                    borderColor: '#fff',
+                    borderWidth: 2,
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.8
+                },
+                {
+                    label: 'Female Students',
+                    data: Object.keys(genderSectionData).map(section => genderSectionData[section]['Female'] || 0),
+                    backgroundColor: '#e74a3b',
+                    borderColor: '#fff',
+                    borderWidth: 2,
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.8
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+                duration: 1000,
+                easing: 'easeOutQuart'
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    align: 'start',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 15,
+                        color: '#333',
+                        font: {
+                            weight: 'bold',
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            const label = context.dataset.label || '';
+                            const value = context.parsed.y || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? (value / total * 100).toFixed(1) + '%' : '0%';
+                            return `${label}: ${value} (${percentage})`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 11
+                        },
+                        padding: 10
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false,
+                        drawBorder: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 11
+                        },
+                        padding: 5
+                    }
+                }
+            }
+        }
+    });
 </script>

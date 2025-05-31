@@ -29,14 +29,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $profile_image = null;
     $new_student_id = null;
-    
-    $query = "INSERT INTO students (
-         student_no, academic_status, last_name, first_name, mi, profile_image,
-         gender, birthday, year_level, section, academic, 
-         semester, student_classification, address, city, province, adviser_id
+      $query = "INSERT INTO students (
+         student_no, academic_status, last_name, first_name, mi,
+         sex, birthday, year_level, section, academic, 
+         semester, student_classification, address, city, province, advisor_id
      ) VALUES (
          '$student_no', '$academic_status', '$last_name', '$first_name', '$mi',
-         NULL,
          '$gender', '$birthday', $year_level, '$section', '$academic',
          '$semester', '$student_classification', '$address', '$city', '$province', " . ($adviser_id ? $adviser_id : "NULL") . "
      )";
