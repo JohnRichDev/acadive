@@ -9,36 +9,11 @@ $currentSection = isset($_GET['section']) ? $_GET['section'] : 'dashboard';
 $studentToEdit = null;
 if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($_GET['student_id'])) {
     include './database/connection.php';
-    $student_id_raw = $_GET['student_id'];    if (filter_var($student_id_raw, FILTER_VALIDATE_INT) === false) {
+    $student_id_raw = $_GET['student_id'];
+    if (filter_var($student_id_raw, FILTER_VALIDATE_INT) === false) {
+
         $_SESSION["error"] = "Invalid student ID format.";
-        
-        $redirectUrl = "index.php?section=students";
-        $filterParams = [];
-        
-        if (isset($_GET['search']) && !empty($_GET['search'])) {
-            $filterParams[] = "search=" . urlencode($_GET['search']);
-        }
-        if (isset($_GET['academic_year']) && !empty($_GET['academic_year'])) {
-            $filterParams[] = "academic_year=" . urlencode($_GET['academic_year']);
-        }
-        if (isset($_GET['semester']) && !empty($_GET['semester'])) {
-            $filterParams[] = "semester=" . urlencode($_GET['semester']);
-        }
-        if (isset($_GET['sort']) && !empty($_GET['sort'])) {
-            $filterParams[] = "sort=" . urlencode($_GET['sort']);
-        }
-        if (isset($_GET['limit']) && !empty($_GET['limit'])) {
-            $filterParams[] = "limit=" . urlencode($_GET['limit']);
-        }
-        if (isset($_GET['page']) && !empty($_GET['page'])) {
-            $filterParams[] = "page=" . urlencode($_GET['page']);
-        }
-        
-        if (!empty($filterParams)) {
-            $redirectUrl .= "&" . implode("&", $filterParams);
-        }
-        
-        header("Location: " . $redirectUrl);
+        header("Location: index.php?section=students");
         exit;
     }
     $student_id = mysqli_real_escape_string($conn, $student_id_raw);
@@ -46,36 +21,10 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
     $query = "SELECT * FROM students WHERE id = '$student_id'";
     $result = mysqli_query($conn, $query);
     if ($result && mysqli_num_rows($result) > 0) {
-        $studentToEdit = mysqli_fetch_assoc($result);    } else {
+        $studentToEdit = mysqli_fetch_assoc($result);
+    } else {
         $_SESSION["error"] = "Student record not found (ID: " . htmlspecialchars($student_id_raw) . ").";
-        
-        $redirectUrl = "index.php?section=students";
-        $filterParams = [];
-        
-        if (isset($_GET['search']) && !empty($_GET['search'])) {
-            $filterParams[] = "search=" . urlencode($_GET['search']);
-        }
-        if (isset($_GET['academic_year']) && !empty($_GET['academic_year'])) {
-            $filterParams[] = "academic_year=" . urlencode($_GET['academic_year']);
-        }
-        if (isset($_GET['semester']) && !empty($_GET['semester'])) {
-            $filterParams[] = "semester=" . urlencode($_GET['semester']);
-        }
-        if (isset($_GET['sort']) && !empty($_GET['sort'])) {
-            $filterParams[] = "sort=" . urlencode($_GET['sort']);
-        }
-        if (isset($_GET['limit']) && !empty($_GET['limit'])) {
-            $filterParams[] = "limit=" . urlencode($_GET['limit']);
-        }
-        if (isset($_GET['page']) && !empty($_GET['page'])) {
-            $filterParams[] = "page=" . urlencode($_GET['page']);
-        }
-        
-        if (!empty($filterParams)) {
-            $redirectUrl .= "&" . implode("&", $filterParams);
-        }
-        
-        header("Location: " . $redirectUrl);
+        header("Location: index.php?section=students");
         exit;
     }
 }
@@ -543,9 +492,7 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
             font-size: 14px;
             margin-left: 10px;
             text-decoration: none;
-        }
-
-        .btn-primary {
+        }        .btn-primary {
             background-color: #1c3d7a;
             color: white;
         }
@@ -667,9 +614,7 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
         .dashboard-graphs-container::-webkit-scrollbar-thumb:hover,
         .students-table-container::-webkit-scrollbar-thumb:hover {
             background: #a8a8a8;
-        }
-
-        .card.dashboard-main {
+        }        .card.dashboard-main {
             max-height: calc(100vh - 250px);
             overflow: hidden;
             display: flex;
@@ -813,22 +758,16 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         @keyframes slideIn {
-            from {
+            from { 
                 opacity: 0;
                 transform: translateY(-20px) scale(0.9);
             }
-
-            to {
+            to { 
                 opacity: 1;
                 transform: translateY(0) scale(1);
             }
@@ -913,38 +852,12 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
 
     <div id="addStudentModal" class="modal"
         style="<?php echo (isset($_GET['showModal']) && $_GET['showModal'] === 'addStudent') ? 'display:block;' : 'display:none;'; ?>">
-        <div class="modal-content">            <div class="modal-header">
+        <div class="modal-content">
+            <div class="modal-header">
                 <h2>Add New Student Record</h2>
-                <?php
-                $closeUrl = "?section=" . htmlspecialchars($currentSection);
-                $filterParams = [];
-                if (isset($_GET['search']) && !empty($_GET['search'])) {
-                    $filterParams[] = "search=" . urlencode($_GET['search']);
-                }
-                if (isset($_GET['academic_year']) && !empty($_GET['academic_year'])) {
-                    $filterParams[] = "academic_year=" . urlencode($_GET['academic_year']);
-                }
-                if (isset($_GET['semester']) && !empty($_GET['semester'])) {
-                    $filterParams[] = "semester=" . urlencode($_GET['semester']);
-                }
-                if (isset($_GET['sort']) && !empty($_GET['sort'])) {
-                    $filterParams[] = "sort=" . urlencode($_GET['sort']);
-                }
-                if (isset($_GET['limit']) && !empty($_GET['limit'])) {
-                    $filterParams[] = "limit=" . urlencode($_GET['limit']);
-                }
-                if (isset($_GET['page']) && !empty($_GET['page'])) {
-                    $filterParams[] = "page=" . urlencode($_GET['page']);
-                }
-                if (!empty($filterParams)) {
-                    $closeUrl .= "&" . implode("&", $filterParams);
-                }
-                ?>
-                <a href="<?php echo $closeUrl; ?>" class="close"
-                    title="Close">&times;</a>
+                <a href="?section=<?php echo htmlspecialchars($currentSection); ?>" class="close" title="Close">&times;</a>
             </div>
-            <div id="alertMessage" class="alert"
-                style="<?php echo (isset($_SESSION['modal_error']) || isset($_SESSION['modal_success'])) ? 'display:block;' : 'display:none;'; ?>">
+            <div id="alertMessage" class="alert" style="<?php echo (isset($_SESSION['modal_error']) || isset($_SESSION['modal_success'])) ? 'display:block;' : 'display:none;'; ?>">
                 <?php
                 if (isset($_SESSION['modal_error'])) {
                     echo '<div class="alert alert-error">' . htmlspecialchars($_SESSION['modal_error']) . '</div>';
@@ -957,25 +870,6 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
                 ?>
             </div>
             <form id="addStudentForm" action="process/add_student.php" method="POST" enctype="multipart/form-data">
-                <!-- Hidden fields to preserve current filters -->
-                <?php if (isset($_GET['search']) && !empty($_GET['search'])): ?>
-                    <input type="hidden" name="filter_search" value="<?php echo htmlspecialchars($_GET['search']); ?>">
-                <?php endif; ?>
-                <?php if (isset($_GET['academic_year']) && !empty($_GET['academic_year'])): ?>
-                    <input type="hidden" name="filter_academic_year" value="<?php echo htmlspecialchars($_GET['academic_year']); ?>">
-                <?php endif; ?>
-                <?php if (isset($_GET['semester']) && !empty($_GET['semester'])): ?>
-                    <input type="hidden" name="filter_semester" value="<?php echo htmlspecialchars($_GET['semester']); ?>">
-                <?php endif; ?>
-                <?php if (isset($_GET['sort']) && !empty($_GET['sort'])): ?>
-                    <input type="hidden" name="filter_sort" value="<?php echo htmlspecialchars($_GET['sort']); ?>">
-                <?php endif; ?>
-                <?php if (isset($_GET['limit']) && !empty($_GET['limit'])): ?>
-                    <input type="hidden" name="filter_limit" value="<?php echo htmlspecialchars($_GET['limit']); ?>">
-                <?php endif; ?>
-                <?php if (isset($_GET['page']) && !empty($_GET['page'])): ?>
-                    <input type="hidden" name="filter_page" value="<?php echo htmlspecialchars($_GET['page']); ?>">
-                <?php endif; ?>
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="student_no">Student Number</label>
@@ -995,13 +889,10 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
                     <div class="form-group">
                         <label for="first_name">First Name</label>
                         <input type="text" id="first_name" name="first_name" required>
-                    </div>                    <div class="form-group">
-                        <label for="mi">Middle Initial</label>
-                        <input type="text" id="mi" name="mi" maxlength="5">
                     </div>
                     <div class="form-group">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email" required>
+                        <label for="mi">Middle Initial</label>
+                        <input type="text" id="mi" name="mi" maxlength="5">
                     </div>
                     <div class="form-group">
                         <label for="gender">Sex</label>
@@ -1036,8 +927,7 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="academic_year_form">Academic Year</label> <select name="academic_year"
-                            id="academic_year_form" required>
+                        <label for="academic_year_form">Academic Year</label> <select name="academic_year" id="academic_year_form" required>
                             <?php
                             $startYear = date("Y") + 1;
                             for ($i = 0; $i < 6; $i++) {
@@ -1079,35 +969,10 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
                 </div>
                 <div class="form-group">
                     <label for="profile_image">Profile Image (Optional)</label>
-                    <input type="file" id="profile_image" name="profile_image"
-                        accept="image/png, image/jpeg, image/gif, image/webp">
-                </div>                <div class="form-buttons" style="text-align: center;">
-                    <?php
-                    $cancelUrl = "?section=" . htmlspecialchars($currentSection);
-                    $filterParams = [];
-                    if (isset($_GET['search']) && !empty($_GET['search'])) {
-                        $filterParams[] = "search=" . urlencode($_GET['search']);
-                    }
-                    if (isset($_GET['academic_year']) && !empty($_GET['academic_year'])) {
-                        $filterParams[] = "academic_year=" . urlencode($_GET['academic_year']);
-                    }
-                    if (isset($_GET['semester']) && !empty($_GET['semester'])) {
-                        $filterParams[] = "semester=" . urlencode($_GET['semester']);
-                    }
-                    if (isset($_GET['sort']) && !empty($_GET['sort'])) {
-                        $filterParams[] = "sort=" . urlencode($_GET['sort']);
-                    }
-                    if (isset($_GET['limit']) && !empty($_GET['limit'])) {
-                        $filterParams[] = "limit=" . urlencode($_GET['limit']);
-                    }
-                    if (isset($_GET['page']) && !empty($_GET['page'])) {
-                        $filterParams[] = "page=" . urlencode($_GET['page']);
-                    }
-                    if (!empty($filterParams)) {
-                        $cancelUrl .= "&" . implode("&", $filterParams);
-                    }
-                    ?>
-                    <a href="<?php echo $cancelUrl; ?>" class="btn btn-secondary"
+                    <input type="file" id="profile_image" name="profile_image" accept="image/png, image/jpeg, image/gif, image/webp">
+                </div>
+                <div class="form-buttons" style="text-align: center;">
+                    <a href="?section=<?php echo htmlspecialchars($currentSection); ?>" class="btn btn-secondary"
                         style="text-decoration:none;">Cancel</a>
                     <input type="submit" class="btn btn-primary" value="Save Student">
                 </div>
@@ -1122,8 +987,7 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
                 <h2>Edit Student Record</h2>
                 <a href="?section=students" class="close" title="Close">&times;</a>
             </div>
-            <div id="editAlertMessage" class="alert"
-                style="<?php echo (isset($_SESSION['edit_modal_error']) || isset($_SESSION['edit_modal_success'])) ? 'display:block;' : 'display:none;'; ?>">
+            <div id="editAlertMessage" class="alert" style="<?php echo (isset($_SESSION['edit_modal_error']) || isset($_SESSION['edit_modal_success'])) ? 'display:block;' : 'display:none;'; ?>">
                 <?php
                 if (isset($_SESSION['edit_modal_error'])) {
                     echo '<div class="alert alert-error">' . htmlspecialchars($_SESSION['edit_modal_error']) . '</div>';
@@ -1135,33 +999,13 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
                 }
                 ?>
             </div>
-            <?php if ($studentToEdit): ?>                <form id="editStudentForm" action="process/edit_student.php" method="POST" enctype="multipart/form-data">
+            <?php if ($studentToEdit): ?>
+                <form id="editStudentForm" action="process/edit_student.php" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="student_id" value="<?php echo htmlspecialchars($studentToEdit['id']); ?>">
-                    
-                    <!-- Hidden fields to preserve current filters -->
-                    <?php if (isset($_GET['search']) && !empty($_GET['search'])): ?>
-                        <input type="hidden" name="filter_search" value="<?php echo htmlspecialchars($_GET['search']); ?>">
-                    <?php endif; ?>
-                    <?php if (isset($_GET['academic_year']) && !empty($_GET['academic_year'])): ?>
-                        <input type="hidden" name="filter_academic_year" value="<?php echo htmlspecialchars($_GET['academic_year']); ?>">
-                    <?php endif; ?>
-                    <?php if (isset($_GET['semester']) && !empty($_GET['semester'])): ?>
-                        <input type="hidden" name="filter_semester" value="<?php echo htmlspecialchars($_GET['semester']); ?>">
-                    <?php endif; ?>
-                    <?php if (isset($_GET['sort']) && !empty($_GET['sort'])): ?>
-                        <input type="hidden" name="filter_sort" value="<?php echo htmlspecialchars($_GET['sort']); ?>">
-                    <?php endif; ?>
-                    <?php if (isset($_GET['limit']) && !empty($_GET['limit'])): ?>
-                        <input type="hidden" name="filter_limit" value="<?php echo htmlspecialchars($_GET['limit']); ?>">
-                    <?php endif; ?>
-                    <?php if (isset($_GET['page']) && !empty($_GET['page'])): ?>
-                        <input type="hidden" name="filter_page" value="<?php echo htmlspecialchars($_GET['page']); ?>">
-                    <?php endif; ?>>
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="edit_student_no">Student Number</label>
-                            <input type="text" id="edit_student_no" name="student_no"
-                                value="<?php echo htmlspecialchars($studentToEdit['student_no']); ?>" required>
+                            <input type="text" id="edit_student_no" name="student_no" value="<?php echo htmlspecialchars($studentToEdit['student_no']); ?>" required>
                         </div>
                         <div class="form-group">
                             <label for="edit_academic_status">Academic Status</label>
@@ -1172,53 +1016,38 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
                         </div>
                         <div class="form-group">
                             <label for="edit_last_name">Last Name</label>
-                            <input type="text" id="edit_last_name" name="last_name"
-                                value="<?php echo htmlspecialchars($studentToEdit['last_name']); ?>" required>
+                            <input type="text" id="edit_last_name" name="last_name" value="<?php echo htmlspecialchars($studentToEdit['last_name']); ?>" required>
                         </div>
                         <div class="form-group">
                             <label for="edit_first_name">First Name</label>
-                            <input type="text" id="edit_first_name" name="first_name"
-                                value="<?php echo htmlspecialchars($studentToEdit['first_name']); ?>" required>
-                        </div>                        <div class="form-group">
-                            <label for="edit_mi">Middle Initial</label>
-                            <input type="text" id="edit_mi" name="mi" maxlength="5"
-                                value="<?php echo htmlspecialchars($studentToEdit['mi']); ?>">
+                            <input type="text" id="edit_first_name" name="first_name" value="<?php echo htmlspecialchars($studentToEdit['first_name']); ?>" required>
                         </div>
                         <div class="form-group">
-                            <label for="edit_email">Email Address</label>
-                            <input type="email" id="edit_email" name="email"
-                                value="<?php echo htmlspecialchars($studentToEdit['email']); ?>" required>
+                            <label for="edit_mi">Middle Initial</label>
+                            <input type="text" id="edit_mi" name="mi" maxlength="5" value="<?php echo htmlspecialchars($studentToEdit['mi']); ?>">
                         </div>
                         <div class="form-group">
                             <label for="edit_gender">Gender</label>
-                            <select id="edit_gender" name="gender" required>
-                                <option value="Male" <?php echo ($studentToEdit['sex'] === 'Male') ? 'selected' : ''; ?>>Male
-                                </option>
-                                <option value="Female" <?php echo ($studentToEdit['sex'] === 'Female') ? 'selected' : ''; ?>>
-                                    Female</option>
-                                <option value="Other" <?php echo ($studentToEdit['sex'] === 'Other') ? 'selected' : ''; ?>>
-                                    Other</option>
+                            <select id="edit_gender" name="gender" required>                                <option value="Male" <?php echo ($studentToEdit['sex'] === 'Male') ? 'selected' : ''; ?>>Male</option>
+                                <option value="Female" <?php echo ($studentToEdit['sex'] === 'Female') ? 'selected' : ''; ?>>Female</option>
+                                <option value="Other" <?php echo ($studentToEdit['sex'] === 'Other') ? 'selected' : ''; ?>>Other</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="edit_birthday">Birthday</label>
-                            <input type="date" id="edit_birthday" name="birthday"
-                                value="<?php echo htmlspecialchars($studentToEdit['birthday']); ?>" required>
+                            <input type="date" id="edit_birthday" name="birthday" value="<?php echo htmlspecialchars($studentToEdit['birthday']); ?>" required>
                         </div>
                         <div class="form-group">
                             <label for="edit_year_level">Year Level</label>
                             <select id="edit_year_level" name="year_level" required>
                                 <?php for ($i = 1; $i <= 5; $i++): ?>
-                                    <option value="<?php echo $i; ?>" <?php echo ($studentToEdit['year_level'] == $i) ? 'selected' : ''; ?>>
-                                        <?php echo $i;
-                                        echo ($i == 1) ? 'st' : (($i == 2) ? 'nd' : (($i == 3) ? 'rd' : 'th')); ?>
-                                        Year</option>
+                                    <option value="<?php echo $i; ?>" <?php echo ($studentToEdit['year_level'] == $i) ? 'selected' : ''; ?>><?php echo $i;
+                                                                                                                                            echo ($i == 1) ? 'st' : (($i == 2) ? 'nd' : (($i == 3) ? 'rd' : 'th')); ?> Year</option>
                                 <?php endfor; ?>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="edit_section_form">Section</label> <select id="edit_section_form" name="section"
-                                required>
+                            <label for="edit_section_form">Section</label> <select id="edit_section_form" name="section" required>
                                 <?php $sections = ['A', 'B', 'C', 'D', 'E', 'F']; ?>
                                 <?php foreach ($sections as $sec): ?>
                                     <option value="<?php echo $sec; ?>" <?php echo ($studentToEdit['section'] === $sec) ? 'selected' : ''; ?>><?php echo $sec; ?></option>
@@ -1226,8 +1055,7 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="edit_academic_year_form">Academic Year</label> <select name="academic_year"
-                                id="edit_academic_year_form" required>
+                            <label for="edit_academic_year_form">Academic Year</label> <select name="academic_year" id="edit_academic_year_form" required>
                                 <?php
                                 $startYear = date("Y") + 1;
                                 for ($k = 0; $k < 6; $k++) {
@@ -1240,122 +1068,61 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="edit_semester_form">Semester</label> <select id="edit_semester_form" name="semester"
-                                required>
-                                <option value="1st" <?php echo ($studentToEdit['semester'] === '1st Semester') ? 'selected' : ''; ?>>
-                                    1st Semester</option>
-                                <option value="2nd" <?php echo ($studentToEdit['semester'] === '2nd Semester') ? 'selected' : ''; ?>>
-                                    2nd Semester</option>
+                            <label for="edit_semester_form">Semester</label> <select id="edit_semester_form" name="semester" required>
+                                <option value="1st" <?php echo ($studentToEdit['semester'] === '1st') ? 'selected' : ''; ?>>1st Semester</option>
+                                <option value="2nd" <?php echo ($studentToEdit['semester'] === '2nd') ? 'selected' : ''; ?>>2nd Semester</option>
                                 <option value="Mid-Year" <?php echo ($studentToEdit['semester'] === 'Mid-Year') ? 'selected' : ''; ?>>Mid-Year</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="edit_student_classification">Student Classification</label>
                             <select id="edit_student_classification" name="student_classification" required>
-                                <option value="Enrolled">Officially Enrolled</option>
-                                <option value="Dropped">Dropped</option>
+                                <option value="New" <?php echo ($studentToEdit['student_classification'] === 'New') ? 'selected' : ''; ?>>New Student</option>
+                                <option value="Regular" <?php echo ($studentToEdit['student_classification'] === 'Regular') ? 'selected' : ''; ?>>Regular Student</option>
+                                <option value="Transferee" <?php echo ($studentToEdit['student_classification'] === 'Transferee') ? 'selected' : ''; ?>>Transferee</option>
                             </select>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="edit_address">Address (Street, Barangay)</label>
-                        <input type="text" id="edit_address" name="address"
-                            value="<?php echo htmlspecialchars($studentToEdit['address']); ?>" required>
+                        <input type="text" id="edit_address" name="address" value="<?php echo htmlspecialchars($studentToEdit['address']); ?>" required>
                     </div>
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="edit_city">City / Municipality</label>
-                            <input type="text" id="edit_city" name="city"
-                                value="<?php echo htmlspecialchars($studentToEdit['city']); ?>" required>
+                            <input type="text" id="edit_city" name="city" value="<?php echo htmlspecialchars($studentToEdit['city']); ?>" required>
                         </div>
                         <div class="form-group">
                             <label for="edit_province">Province</label>
-                            <input type="text" id="edit_province" name="province"
-                                value="<?php echo htmlspecialchars($studentToEdit['province']); ?>" required>
+                            <input type="text" id="edit_province" name="province" value="<?php echo htmlspecialchars($studentToEdit['province']); ?>" required>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="edit_profile_image">New Profile Image (Optional - leave blank to keep current)</label>
-                        <input type="file" id="edit_profile_image" name="profile_image"
-                            accept="image/png, image/jpeg, image/gif, image/webp">
+                        <input type="file" id="edit_profile_image" name="profile_image" accept="image/png, image/jpeg, image/gif, image/webp">
                         <?php
                         if (!empty($studentToEdit['profile_image']) && file_exists($studentToEdit['profile_image'])) {
                             echo '<p style="margin-top: 5px;">Current image: <img src="' . htmlspecialchars($studentToEdit['profile_image']) . '" alt="Current Profile Image" style="max-width: 100px; max-height: 100px; vertical-align: middle; margin-left: 10px;"></p>';
                         } else if (!empty($studentToEdit['profile_image'])) {
                             echo '<p style="margin-top: 5px; color: #777;">Current image path (not found): ' . htmlspecialchars($studentToEdit['profile_image']) . '</p>';
                         }
-                        ?>
-                    </div>                    <div class="form-buttons"
-                        style="text-align: center; display: flex; gap: 10px; justify-content: center;">
-                        <?php
-                        $cancelUrl = "?section=students";
-                        $filterParams = [];
-                        if (isset($_GET['search']) && !empty($_GET['search'])) {
-                            $filterParams[] = "search=" . urlencode($_GET['search']);
-                        }
-                        if (isset($_GET['academic_year']) && !empty($_GET['academic_year'])) {
-                            $filterParams[] = "academic_year=" . urlencode($_GET['academic_year']);
-                        }
-                        if (isset($_GET['semester']) && !empty($_GET['semester'])) {
-                            $filterParams[] = "semester=" . urlencode($_GET['semester']);
-                        }
-                        if (isset($_GET['sort']) && !empty($_GET['sort'])) {
-                            $filterParams[] = "sort=" . urlencode($_GET['sort']);
-                        }
-                        if (isset($_GET['limit']) && !empty($_GET['limit'])) {
-                            $filterParams[] = "limit=" . urlencode($_GET['limit']);
-                        }
-                        if (isset($_GET['page']) && !empty($_GET['page'])) {
-                            $filterParams[] = "page=" . urlencode($_GET['page']);
-                        }
-                        if (!empty($filterParams)) {
-                            $cancelUrl .= "&" . implode("&", $filterParams);
-                        }
-                        ?>
-                        <a href="<?php echo $cancelUrl; ?>" class="btn btn-secondary" style="text-decoration:none;">Cancel</a>
+                        ?>                    </div>                    <div class="form-buttons" style="text-align: center; display: flex; gap: 10px; justify-content: center;">
+                        <a href="?section=students" class="btn btn-secondary" style="text-decoration:none;">Cancel</a>
                         <input type="submit" class="btn btn-primary" value="Update Student">
-                        <button type="button" class="btn btn-danger"
-                            onclick="confirmDeleteStudent(<?php echo htmlspecialchars($studentToEdit['id']); ?>)"
-                            style="background-color: #dc3545; color: white; border: 1px solid #dc3545; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease;"
-                            onmouseover="this.style.backgroundColor='#c82333'"
-                            onmouseout="this.style.backgroundColor='#dc3545'">
+                        <button type="button" class="btn btn-danger" onclick="confirmDeleteStudent(<?php echo htmlspecialchars($studentToEdit['id']); ?>)" style="background-color: #dc3545; color: white; border: 1px solid #dc3545; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='#c82333'" onmouseout="this.style.backgroundColor='#dc3545'">
                             <i class="fas fa-trash-alt" style="margin-right: 5px;"></i>Delete Student
                         </button>
                     </div>
-                </form>            <?php else: ?>
+                </form>
+            <?php else: ?>
                 <p>Student data could not be loaded for editing. Please ensure the student ID is correct and try again.</p>
                 <div class="form-buttons" style="text-align: center;">
-                    <?php
-                    $backUrl = "?section=students";
-                    $filterParams = [];
-                    if (isset($_GET['search']) && !empty($_GET['search'])) {
-                        $filterParams[] = "search=" . urlencode($_GET['search']);
-                    }
-                    if (isset($_GET['academic_year']) && !empty($_GET['academic_year'])) {
-                        $filterParams[] = "academic_year=" . urlencode($_GET['academic_year']);
-                    }
-                    if (isset($_GET['semester']) && !empty($_GET['semester'])) {
-                        $filterParams[] = "semester=" . urlencode($_GET['semester']);
-                    }
-                    if (isset($_GET['sort']) && !empty($_GET['sort'])) {
-                        $filterParams[] = "sort=" . urlencode($_GET['sort']);
-                    }
-                    if (isset($_GET['limit']) && !empty($_GET['limit'])) {
-                        $filterParams[] = "limit=" . urlencode($_GET['limit']);
-                    }
-                    if (isset($_GET['page']) && !empty($_GET['page'])) {
-                        $filterParams[] = "page=" . urlencode($_GET['page']);
-                    }
-                    if (!empty($filterParams)) {
-                        $backUrl .= "&" . implode("&", $filterParams);
-                    }
-                    ?>
-                    <a href="<?php echo $backUrl; ?>" class="btn btn-secondary" style="text-decoration:none;">Back to List</a>
+                    <a href="?section=students" class="btn btn-secondary" style="text-decoration:none;">Back to List</a>
                 </div>
-            <?php endif; ?>
-        </div>
-    </div>
-
+            <?php endif; ?>        </div>
+    </div>    
+    
+    <!-- Custom Confirmation Modal -->
     <div id="customConfirmModal" class="confirmation-modal">
         <div class="confirmation-modal-content">
             <div class="confirmation-modal-header">
@@ -1375,8 +1142,7 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
             </div>
             <div class="confirmation-modal-footer">
                 <button class="confirmation-btn confirmation-btn-cancel" onclick="hideCustomConfirm()">Cancel</button>
-                <button class="confirmation-btn confirmation-btn-confirm" onclick="confirmAction()">Delete
-                    Student</button>
+                <button class="confirmation-btn confirmation-btn-confirm" onclick="confirmAction()">Delete Student</button>
             </div>
         </div>
     </div>
@@ -1398,100 +1164,41 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
                 deleteStudent(pendingStudentId);
                 hideCustomConfirm();
             }
-        }        function deleteStudent(studentId) {
+        }
+
+        function deleteStudent(studentId) {
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = 'process/delete_student.php';
-
+            
             const input = document.createElement('input');
             input.type = 'hidden';
             input.name = 'student_id';
             input.value = studentId;
+            
             form.appendChild(input);
-            
-            const urlParams = new URLSearchParams(window.location.search);
-            
-            if (urlParams.get('search')) {
-                const searchInput = document.createElement('input');
-                searchInput.type = 'hidden';
-                searchInput.name = 'filter_search';
-                searchInput.value = urlParams.get('search');
-                form.appendChild(searchInput);
-            }
-            
-            if (urlParams.get('academic_year')) {
-                const academicYearInput = document.createElement('input');
-                academicYearInput.type = 'hidden';
-                academicYearInput.name = 'filter_academic_year';
-                academicYearInput.value = urlParams.get('academic_year');
-                form.appendChild(academicYearInput);
-            }
-            
-            if (urlParams.get('semester')) {
-                const semesterInput = document.createElement('input');
-                semesterInput.type = 'hidden';
-                semesterInput.name = 'filter_semester';
-                semesterInput.value = urlParams.get('semester');
-                form.appendChild(semesterInput);
-            }
-            
-            if (urlParams.get('sort')) {
-                const sortInput = document.createElement('input');
-                sortInput.type = 'hidden';
-                sortInput.name = 'filter_sort';
-                sortInput.value = urlParams.get('sort');
-                form.appendChild(sortInput);
-            }
-            
-            if (urlParams.get('limit')) {
-                const limitInput = document.createElement('input');
-                limitInput.type = 'hidden';
-                limitInput.name = 'filter_limit';
-                limitInput.value = urlParams.get('limit');
-                form.appendChild(limitInput);
-            }
-            
-            if (urlParams.get('page')) {
-                const pageInput = document.createElement('input');
-                pageInput.type = 'hidden';
-                pageInput.name = 'filter_page';
-                pageInput.value = urlParams.get('page');
-                form.appendChild(pageInput);
-            }
-
             document.body.appendChild(form);
             form.submit();
         }
 
         function confirmDeleteStudent(studentId) {
             showCustomConfirm(studentId);
-        } document.addEventListener('DOMContentLoaded', function () {
+        }        document.addEventListener('DOMContentLoaded', function() {
             const addStudentModal = document.getElementById('addStudentModal');
             const editStudentModal = document.getElementById('editStudentModal');
-            const customConfirmModal = document.getElementById('customConfirmModal');            function closeModalAndResetURL(modalElement) {
+            const customConfirmModal = document.getElementById('customConfirmModal');
+
+            function closeModalAndResetURL(modalElement) {
                 if (modalElement && modalElement.style.display === 'block') {
                     const currentUrl = new URL(window.location.href);
-                    
-                    const filtersToKeep = ['search', 'academic_year', 'semester', 'sort', 'limit', 'page', 'section'];
-                    const preservedParams = {};
-                    
-                    filtersToKeep.forEach(param => {
-                        if (currentUrl.searchParams.has(param)) {
-                            preservedParams[param] = currentUrl.searchParams.get(param);
-                        }
-                    });
-                    
-                    currentUrl.search = '';
-                    Object.keys(preservedParams).forEach(key => {
-                        currentUrl.searchParams.set(key, preservedParams[key]);
-                    });
-                    
+                    currentUrl.searchParams.delete('showModal');
+                    currentUrl.searchParams.delete('student_id');
                     window.history.replaceState({}, '', currentUrl.toString());
                     modalElement.style.display = 'none';
                 }
             }
 
-            window.addEventListener('click', function (event) {
+            window.addEventListener('click', function(event) {
                 if (event.target === addStudentModal) {
                     closeModalAndResetURL(addStudentModal);
                 }
@@ -1503,7 +1210,7 @@ if (isset($_GET['showModal']) && $_GET['showModal'] === 'editStudent' && isset($
                 }
             });
 
-            document.addEventListener('keydown', function (event) {
+            document.addEventListener('keydown', function(event) {
                 if (customConfirmModal.style.display === 'block') {
                     if (event.key === 'Escape') {
                         hideCustomConfirm();
