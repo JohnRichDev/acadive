@@ -102,6 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 } else {
     $_SESSION["error"] = "Invalid request method.";
     
+    // Build redirect URL with preserved filters (if available in GET parameters)
     $redirectUrl = "../index.php?section=students";
     $filterParams = [];
     

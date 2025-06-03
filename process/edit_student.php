@@ -30,6 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }    if (!$student_id) {
         $_SESSION["error"] = "Error: Student ID is missing.";
         
+        // Build redirect URL with preserved filters
         $redirectUrl = "../index.php?section=students";
         $filterParams = [];
         
@@ -71,6 +72,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $duplicateResult = mysqli_query($conn, $duplicateQuery);        if ($duplicateResult && mysqli_num_rows($duplicateResult) > 0) {
             $_SESSION["error"] = "Error: Student number already exists for another student.";
             
+            // Build redirect URL with preserved filters
             $redirectUrl = "../index.php?section=students";
             $filterParams = [];
             
@@ -162,7 +164,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 address = '$address', 
                 city = '$city', 
                 province = '$province'
-                WHERE id = '$student_id'";
+                WHERE id = '$student_id'";    // Build redirect URL with preserved filters
     $redirectUrl = "../index.php?section=students";
     $filterParams = [];
     
@@ -200,6 +202,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 } else {
     $_SESSION["error"] = "Invalid request method.";
     
+    // Build redirect URL with preserved filters (if available in GET parameters)
     $redirectUrl = "../index.php?section=students";
     $filterParams = [];
     
