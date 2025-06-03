@@ -15,17 +15,12 @@ if (mysqli_num_rows($result) > 0) {
         $_SESSION["error"] = "Your account is locked!";
         header("Location: ../login.php");
         exit;
-    }
-
-    if (password_verify($password, $row["password"])) {
+    }    if ($password == $row["password"]) {
         $_SESSION["username"] = $username;
         $_SESSION["user_id"] = $row["id"];
         header("Location: ../index.php");
         exit;
     }
-
-    $_SESSION["error"] = "Incorrect password!";
-    header("Location: ../login.php");
 
     $query = "UPDATE users SET tries = tries + 1 WHERE username='$username'";
     mysqli_query($conn, $query);

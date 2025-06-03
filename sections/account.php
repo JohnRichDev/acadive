@@ -3,17 +3,11 @@ if (!isset($_SESSION["username"])) {
     header("Location: ../login.php");
     exit;
 }
+
 $username = $_SESSION["username"];
+$uid = $_SESSION["user_id"];
 
-include(__DIR__ . '/../database/connection.php');
-
-$uid = null;
-$query = "SELECT id FROM users WHERE username='$username'";
-$result = mysqli_query($conn, $query);
-if ($result && mysqli_num_rows($result) > 0) {
-    $row = mysqli_fetch_assoc($result);
-    $uid = $row['id'];
-}
+include('database/connection.php');
 ?>
 <div class="section-content">
     <h2>Account Settings</h2>
