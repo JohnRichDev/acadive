@@ -10,10 +10,10 @@ if (!isset($_SESSION['username'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $student_id = isset($_POST["student_id"]) ? mysqli_real_escape_string($conn, $_POST["student_id"]) : null;
     $student_no = mysqli_real_escape_string($conn, $_POST["student_no"]);
-    $academic_status = mysqli_real_escape_string($conn, $_POST["academic_status"]);
-    $last_name = mysqli_real_escape_string($conn, $_POST["last_name"]);
+    $academic_status = mysqli_real_escape_string($conn, $_POST["academic_status"]);    $last_name = mysqli_real_escape_string($conn, $_POST["last_name"]);
     $first_name = mysqli_real_escape_string($conn, $_POST["first_name"]);
     $mi = mysqli_real_escape_string($conn, $_POST["mi"]);
+    $email = mysqli_real_escape_string($conn, $_POST["email"]);
     $gender = mysqli_real_escape_string($conn, $_POST["gender"]);
     $birthday = mysqli_real_escape_string($conn, $_POST["birthday"]);
     $year_level = mysqli_real_escape_string($conn, $_POST["year_level"]);
@@ -27,11 +27,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $advisor_id = null;
     if (isset($_SESSION['user_id'])) {
         $advisor_id = $_SESSION['user_id'];
-    }
-
-    if (!$student_id) {
+    }    if (!$student_id) {
         $_SESSION["error"] = "Error: Student ID is missing.";
-        header("Location: ../index.php?section=students");
+        
+        $redirectUrl = "../index.php?section=students";
+        $filterParams = [];
+        
+        if (isset($_POST['filter_search']) && !empty($_POST['filter_search'])) {
+            $filterParams[] = "search=" . urlencode($_POST['filter_search']);
+        }
+        if (isset($_POST['filter_academic_year']) && !empty($_POST['filter_academic_year'])) {
+            $filterParams[] = "academic_year=" . urlencode($_POST['filter_academic_year']);
+        }
+        if (isset($_POST['filter_semester']) && !empty($_POST['filter_semester'])) {
+            $filterParams[] = "semester=" . urlencode($_POST['filter_semester']);
+        }
+        if (isset($_POST['filter_sort']) && !empty($_POST['filter_sort'])) {
+            $filterParams[] = "sort=" . urlencode($_POST['filter_sort']);
+        }
+        if (isset($_POST['filter_limit']) && !empty($_POST['filter_limit'])) {
+            $filterParams[] = "limit=" . urlencode($_POST['filter_limit']);
+        }
+        if (isset($_POST['filter_page']) && !empty($_POST['filter_page'])) {
+            $filterParams[] = "page=" . urlencode($_POST['filter_page']);
+        }
+        
+        if (!empty($filterParams)) {
+            $redirectUrl .= "&" . implode("&", $filterParams);
+        }
+        
+        header("Location: " . $redirectUrl);
         exit();
     }
 
@@ -43,10 +68,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $old_student_no = str_replace('-', '', $student_data['student_no']);
     }    if ($student_no != $old_student_no) {
         $duplicateQuery = "SELECT id FROM students WHERE student_no = '$student_no' AND id != '$student_id'";
-        $duplicateResult = mysqli_query($conn, $duplicateQuery);
-        if ($duplicateResult && mysqli_num_rows($duplicateResult) > 0) {
+        $duplicateResult = mysqli_query($conn, $duplicateQuery);        if ($duplicateResult && mysqli_num_rows($duplicateResult) > 0) {
             $_SESSION["error"] = "Error: Student number already exists for another student.";
-            header("Location: ../index.php?section=students");
+            
+            $redirectUrl = "../index.php?section=students";
+            $filterParams = [];
+            
+            if (isset($_POST['filter_search']) && !empty($_POST['filter_search'])) {
+                $filterParams[] = "search=" . urlencode($_POST['filter_search']);
+            }
+            if (isset($_POST['filter_academic_year']) && !empty($_POST['filter_academic_year'])) {
+                $filterParams[] = "academic_year=" . urlencode($_POST['filter_academic_year']);
+            }
+            if (isset($_POST['filter_semester']) && !empty($_POST['filter_semester'])) {
+                $filterParams[] = "semester=" . urlencode($_POST['filter_semester']);
+            }
+            if (isset($_POST['filter_sort']) && !empty($_POST['filter_sort'])) {
+                $filterParams[] = "sort=" . urlencode($_POST['filter_sort']);
+            }
+            if (isset($_POST['filter_limit']) && !empty($_POST['filter_limit'])) {
+                $filterParams[] = "limit=" . urlencode($_POST['filter_limit']);
+            }
+            if (isset($_POST['filter_page']) && !empty($_POST['filter_page'])) {
+                $filterParams[] = "page=" . urlencode($_POST['filter_page']);
+            }
+            
+            if (!empty($filterParams)) {
+                $redirectUrl .= "&" . implode("&", $filterParams);
+            }
+            
+            header("Location: " . $redirectUrl);
             exit();
         }
     }
@@ -100,6 +151,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 last_name = '$last_name', 
                 first_name = '$first_name', 
                 mi = '$mi',
+                email = '$email',
                 sex = '$gender', 
                 birthday = '$birthday', 
                 year_level = '$year_level', 
@@ -110,16 +162,70 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 address = '$address', 
                 city = '$city', 
                 province = '$province'
-                WHERE id = '$student_id'";if (mysqli_query($conn, $query)) {
+                WHERE id = '$student_id'";
+    $redirectUrl = "../index.php?section=students";
+    $filterParams = [];
+    
+    if (isset($_POST['filter_search']) && !empty($_POST['filter_search'])) {
+        $filterParams[] = "search=" . urlencode($_POST['filter_search']);
+    }
+    if (isset($_POST['filter_academic_year']) && !empty($_POST['filter_academic_year'])) {
+        $filterParams[] = "academic_year=" . urlencode($_POST['filter_academic_year']);
+    }
+    if (isset($_POST['filter_semester']) && !empty($_POST['filter_semester'])) {
+        $filterParams[] = "semester=" . urlencode($_POST['filter_semester']);
+    }
+    if (isset($_POST['filter_sort']) && !empty($_POST['filter_sort'])) {
+        $filterParams[] = "sort=" . urlencode($_POST['filter_sort']);
+    }
+    if (isset($_POST['filter_limit']) && !empty($_POST['filter_limit'])) {
+        $filterParams[] = "limit=" . urlencode($_POST['filter_limit']);
+    }
+    if (isset($_POST['filter_page']) && !empty($_POST['filter_page'])) {
+        $filterParams[] = "page=" . urlencode($_POST['filter_page']);
+    }
+    
+    if (!empty($filterParams)) {
+        $redirectUrl .= "&" . implode("&", $filterParams);
+    }
+
+    if (mysqli_query($conn, $query)) {
         $_SESSION["success"] = "Student record updated successfully.";
-        header("Location: ../index.php?section=students");
+        header("Location: " . $redirectUrl);
     } else {
         $_SESSION["error"] = "Error updating student record: " . mysqli_error($conn);
-        header("Location: ../index.php?section=students");
+        header("Location: " . $redirectUrl);
     }
     exit();
 } else {
     $_SESSION["error"] = "Invalid request method.";
-    header("Location: ../index.php?section=students");
+    
+    $redirectUrl = "../index.php?section=students";
+    $filterParams = [];
+    
+    if (isset($_GET['search']) && !empty($_GET['search'])) {
+        $filterParams[] = "search=" . urlencode($_GET['search']);
+    }
+    if (isset($_GET['academic_year']) && !empty($_GET['academic_year'])) {
+        $filterParams[] = "academic_year=" . urlencode($_GET['academic_year']);
+    }
+    if (isset($_GET['semester']) && !empty($_GET['semester'])) {
+        $filterParams[] = "semester=" . urlencode($_GET['semester']);
+    }
+    if (isset($_GET['sort']) && !empty($_GET['sort'])) {
+        $filterParams[] = "sort=" . urlencode($_GET['sort']);
+    }
+    if (isset($_GET['limit']) && !empty($_GET['limit'])) {
+        $filterParams[] = "limit=" . urlencode($_GET['limit']);
+    }
+    if (isset($_GET['page']) && !empty($_GET['page'])) {
+        $filterParams[] = "page=" . urlencode($_GET['page']);
+    }
+    
+    if (!empty($filterParams)) {
+        $redirectUrl .= "&" . implode("&", $filterParams);
+    }
+    
+    header("Location: " . $redirectUrl);
     exit();
 }

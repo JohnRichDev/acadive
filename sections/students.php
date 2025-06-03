@@ -105,9 +105,33 @@
                     </select>
                     <i class="fas fa-chevron-down"
                         style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #666;"></i>
-                </div>
-            </div>
-            <a href="index.php?section=students&showModal=addStudent" class="btn btn-primary"
+                </div>            </div>
+            <?php
+            $addStudentUrl = "index.php?section=students&showModal=addStudent";
+            $filterParams = [];
+            if (isset($_GET['search']) && !empty($_GET['search'])) {
+                $filterParams[] = "search=" . urlencode($_GET['search']);
+            }
+            if (isset($_GET['academic_year']) && !empty($_GET['academic_year'])) {
+                $filterParams[] = "academic_year=" . urlencode($_GET['academic_year']);
+            }
+            if (isset($_GET['semester']) && !empty($_GET['semester'])) {
+                $filterParams[] = "semester=" . urlencode($_GET['semester']);
+            }
+            if (isset($_GET['sort']) && !empty($_GET['sort'])) {
+                $filterParams[] = "sort=" . urlencode($_GET['sort']);
+            }
+            if (isset($_GET['limit']) && !empty($_GET['limit'])) {
+                $filterParams[] = "limit=" . urlencode($_GET['limit']);
+            }
+            if (isset($_GET['page']) && !empty($_GET['page'])) {
+                $filterParams[] = "page=" . urlencode($_GET['page']);
+            }
+            if (!empty($filterParams)) {
+                $addStudentUrl .= "&" . implode("&", $filterParams);
+            }
+            ?>
+            <a href="<?php echo $addStudentUrl; ?>" class="btn btn-primary"
                 style="padding: 8px 15px; display: flex; align-items: center; gap: 5px; border-radius: 4px; cursor: pointer; text-decoration: none;">
                 <i class="fas fa-plus"></i> New Student Record
             </a>
@@ -250,8 +274,32 @@
                             echo "<td>" . htmlspecialchars($row['section']) . "</td>";
                             echo "<td>" . htmlspecialchars($row['address'] . ", " . $row['city'] . ", " . $row['province']) . "</td>";
                             
+                            $editUrl = "index.php?section=students&showModal=editStudent&student_id=" . $row['id'];
+                            $filterParams = [];
+                            if (isset($_GET['search']) && !empty($_GET['search'])) {
+                                $filterParams[] = "search=" . urlencode($_GET['search']);
+                            }
+                            if (isset($_GET['academic_year']) && !empty($_GET['academic_year'])) {
+                                $filterParams[] = "academic_year=" . urlencode($_GET['academic_year']);
+                            }
+                            if (isset($_GET['semester']) && !empty($_GET['semester'])) {
+                                $filterParams[] = "semester=" . urlencode($_GET['semester']);
+                            }
+                            if (isset($_GET['sort']) && !empty($_GET['sort'])) {
+                                $filterParams[] = "sort=" . urlencode($_GET['sort']);
+                            }
+                            if (isset($_GET['limit']) && !empty($_GET['limit'])) {
+                                $filterParams[] = "limit=" . urlencode($_GET['limit']);
+                            }
+                            if (isset($_GET['page']) && !empty($_GET['page'])) {
+                                $filterParams[] = "page=" . urlencode($_GET['page']);
+                            }
+                            if (!empty($filterParams)) {
+                                $editUrl .= "&" . implode("&", $filterParams);
+                            }
+                            
                             echo "<td>
-                                    <a href='index.php?section=students&showModal=editStudent&student_id=" . $row['id'] . "' class='action-btn'>
+                                    <a href='" . $editUrl . "' class='action-btn'>
                                         <i class='fas fa-edit'></i>
                                     </a>
                                 </td>";
